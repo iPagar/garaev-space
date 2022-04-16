@@ -1,0 +1,16 @@
+.logo {
+  cursor: pointer;
+  height: 40px;
+  object-fit: contain;
+  width: auto;
+}
+
+.logosContainer {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: absolute;
+  bottom: 40px;
+  left: 40px;
+  pointer-events: all;
+}
