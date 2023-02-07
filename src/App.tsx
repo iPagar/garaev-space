@@ -1,8 +1,9 @@
 import * as THREE from 'three'
-import { Suspense } from 'react'
+import { ReactNode, Suspense } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import { Text } from '@react-three/drei'
 import { LayerMaterial, Depth, Noise } from 'lamina'
+import React from 'react'
 
 export default function App() {
   return (
@@ -24,7 +25,7 @@ function Inner() {
   )
 }
 
-function Caption({ children }) {
+function Caption({ children }: { children: ReactNode }) {
   const { width } = useThree((state) => state.viewport)
   return (
     <Text
@@ -50,9 +51,31 @@ function Bg() {
   return (
     <mesh scale={100}>
       <boxGeometry args={[1, 1, 1]} />
-      <LayerMaterial side={THREE.BackSide}>
-        <Depth colorB="#332FD0" colorA="#9254C8" alpha={1} mode="normal" near={130} far={200} origin={[100, 100, -100]} />
-        <Noise mapping="local" type="white" scale={1000} colorA="white" colorB="black" mode="subtract" alpha={0.05} />
+      <LayerMaterial side={THREE.BackSide} attachArray={undefined} attachObject={undefined} attachFns={undefined}>
+        <Depth
+          colorB="#332FD0"
+          colorA="#9254C8"
+          alpha={1}
+          mode="normal"
+          near={130}
+          far={200}
+          origin={new THREE.Vector3(100, 100, -100)}
+          attachArray={undefined}
+          attachObject={undefined}
+          attachFns={undefined}
+        />
+        <Noise
+          mapping="local"
+          type="white"
+          scale={1000}
+          colorA="white"
+          colorB="black"
+          mode="subtract"
+          alpha={0.05}
+          attachArray={undefined}
+          attachObject={undefined}
+          attachFns={undefined}
+        />
       </LayerMaterial>
     </mesh>
   )
