@@ -31,9 +31,9 @@ function Noodle() {
     const bounds = viewport.getCurrentViewport(camera, [0, 0, z])
     return [THREE.MathUtils.randFloatSpread(bounds.width), THREE.MathUtils.randFloatSpread(bounds.height * 0.75), z]
   }, [viewport])
+
   return (
     <Float position={position} speed={speed} rotationIntensity={10} floatIntensity={40} dispose={null}>
-      <pointLight position={[10, 10, 10]} />
       <mesh scale={5} geometry={geometry} material={material} />
     </Float>
   )

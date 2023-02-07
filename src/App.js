@@ -3,18 +3,24 @@ import { Suspense } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import { Text } from '@react-three/drei'
 import { LayerMaterial, Depth, Noise } from 'lamina'
-import Noodles from './Noodles'
 
 export default function App() {
   return (
     <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 10], fov: 22 }}>
+      <Inner />
+    </Canvas>
+  )
+}
+
+function Inner() {
+  return (
+    <>
       <Bg />
       <Suspense fallback={null}>
-        <Noodles />
-        <Caption>{`THE\nGARAEV\nSTUDIO.`}</Caption>
+        <Caption>{`THE\nGARAEV\nSPACE.`}</Caption>
         <Rig />
       </Suspense>
-    </Canvas>
+    </>
   )
 }
 
@@ -45,8 +51,8 @@ function Bg() {
     <mesh scale={100}>
       <boxGeometry args={[1, 1, 1]} />
       <LayerMaterial side={THREE.BackSide}>
-        <Depth colorB="red" colorA="skyblue" alpha={1} mode="normal" near={130} far={200} origin={[100, 100, -100]} />
-        <Noise mapping="local" type="white" scale={1000} colorA="white" colorB="black" mode="subtract" alpha={0.2} />
+        <Depth colorB="#332FD0" colorA="#9254C8" alpha={1} mode="normal" near={130} far={200} origin={[100, 100, -100]} />
+        <Noise mapping="local" type="white" scale={1000} colorA="white" colorB="black" mode="subtract" alpha={0.05} />
       </LayerMaterial>
     </mesh>
   )
