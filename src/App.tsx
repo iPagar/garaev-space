@@ -5,6 +5,7 @@ import { Text } from '@react-three/drei'
 import { LayerMaterial, Depth, Noise } from 'lamina'
 import React from 'react'
 import { useWindowSize } from 'react-use'
+import { motion } from 'framer-motion-3d'
 
 export default function App() {
   return (
@@ -20,38 +21,44 @@ function Inner() {
       <Bg />
       <Suspense fallback={null}>
         <Caption>{`THE\nGARAEV\nSPACE.`}</Caption>
-        <CirlceLabels>
-          <CirlceLabels.Label>CMS</CirlceLabels.Label>
-          <CirlceLabels.Label>Chat Bots</CirlceLabels.Label>
-          <CirlceLabels.Label>Web Apps</CirlceLabels.Label>
-          <CirlceLabels.Label>Mobile Apps</CirlceLabels.Label>
-          <CirlceLabels.Label>Web Sites</CirlceLabels.Label>
-          <CirlceLabels.Label>Code Review</CirlceLabels.Label>
-          <CirlceLabels.Label>Consulting</CirlceLabels.Label>
-          <CirlceLabels.Label>Testing</CirlceLabels.Label>
-        </CirlceLabels>
+        <СircleLabels>
+          <СircleLabels.Label>CMS</СircleLabels.Label>
+          <СircleLabels.Label>Chat Bots</СircleLabels.Label>
+          <СircleLabels.Label>Web Apps</СircleLabels.Label>
+          <СircleLabels.Label>Mobile Apps</СircleLabels.Label>
+          <СircleLabels.Label>Web Sites</СircleLabels.Label>
+          <СircleLabels.Label>Code Review</СircleLabels.Label>
+          <СircleLabels.Label>Consulting</СircleLabels.Label>
+          <СircleLabels.Label>Testing</СircleLabels.Label>
+        </СircleLabels>
         <Rig />
+        <RigByTime />
       </Suspense>
     </>
   )
 }
 
-const CirlceLabelsContext = React.createContext({})
+const СircleLabelsContext = React.createContext({})
 
-function CirlceLabels({ children }: { children: ReactNode }) {
-  const { width } = useWindowSize()
+function СircleLabels({ children }: { children: ReactNode }) {
+  const { width, height } = useWindowSize()
   const childrenArray = React.Children.toArray(children)
 
-  const coefByWidth = width > 600 ? 1 : 0.5
+  // Адаптируем размер круга в зависимости от размера экрана, уменьшая или увеличивая его радиус.
+  // Используем меньшую из ширины или высоты экрана для расчета, чтобы убедиться, что круг влезет в экран.
+  const screenSize = Math.min(width, height)
+  const circleSize = screenSize / 400 // Динамический размер круга
 
   // make label be in circle
   return (
-    <CirlceLabelsContext.Provider value={{}}>
+    <СircleLabelsContext.Provider value={{}}>
       <group>
         {childrenArray.map((child, i) => {
           const angle = (i / childrenArray.length) * Math.PI * 2
-          const x = Math.cos(angle) * 2 * coefByWidth
-          const y = Math.sin(angle) * 2 * coefByWidth
+          // Применяем динамический размер круга для расчета позиций меток
+          const x = Math.sin(angle) * circleSize
+          const y = Math.cos(angle) * circleSize
+
           return (
             <group key={i} position={[x, y, 0]}>
               {child}
@@ -59,27 +66,63 @@ function CirlceLabels({ children }: { children: ReactNode }) {
           )
         })}
       </group>
-    </CirlceLabelsContext.Provider>
+    </СircleLabelsContext.Provider>
   )
 }
 
-CirlceLabels.Label = function Label({ children }: { children: string }) {
-  const context = React.useContext(CirlceLabelsContext)
+СircleLabels.Label = function Label({ children }: { children: string }) {
+  const [hovered, setHovered] = React.useState(false)
+  const context = React.useContext(СircleLabelsContext)
+  const { width } = useWindowSize()
 
-  if (!context) throw new Error('Label must be used inside CirlceLabels')
+  if (!context) throw new Error('Label must be used inside СircleLabels')
 
+  const variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 }
+  }
+
+  const textRef = React.useRef<THREE.Mesh>(null)
+  const coef = width / 1920
+
+  // underline when hovered
   return (
-    <group>
+    <group
+      onPointerOver={(e) => {
+        e.stopPropagation()
+
+        setHovered(true)
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation()
+
+        setHovered(false)
+      }}
+      onClick={(e) => {
+        e.stopPropagation()
+
+        // add query param
+        const url = new URL(window.location.href)
+        url.searchParams.set('service', children)
+        window.history.pushState({}, '', url.toString())
+      }}>
       <Text
+        ref={textRef}
         position={[0, 0, -5]}
         lineHeight={0.8}
         font="/Ki-Medium.ttf"
-        fontSize={0.09}
+        fontSize={0.2 * coef}
         material-toneMapped={false}
         anchorX="center"
         anchorY="middle">
         {children}
       </Text>
+      <group position={[0, -0.07, -5]}>
+        <mesh scale={[(textRef.current?.geometry.boundingBox?.max.x || 0) * 2, 0.01, 0.01]}>
+          <boxGeometry args={[1, 1, 1]} />
+          <motion.meshStandardMaterial initial="hidden" animate={hovered ? 'visible' : 'hidden'} variants={variants} />
+        </mesh>
+      </group>
     </group>
   )
 }
@@ -100,6 +143,13 @@ function Caption({ children }: { children: ReactNode }) {
   )
 }
 
+function RigByTime({ v = new THREE.Vector3() }) {
+  return useFrame((state) => {
+    const t = state.clock.getElapsedTime()
+    state.camera.position.lerp(v.set(Math.sin(t) * 0.001, Math.cos(t) * 0.001, 10), 0.05)
+  })
+}
+
 function Rig({ v = new THREE.Vector3() }) {
   return useFrame((state) => {
     state.camera.position.lerp(v.set(state.mouse.x / 2, state.mouse.y / 2, 10), 0.05)
@@ -108,7 +158,7 @@ function Rig({ v = new THREE.Vector3() }) {
 
 function Bg() {
   return (
-    <mesh scale={100}>
+    <motion.mesh scale={100}>
       <boxGeometry args={[1, 1, 1]} />
       <LayerMaterial side={THREE.BackSide} attachArray={undefined} attachObject={undefined} attachFns={undefined}>
         <Depth
@@ -136,6 +186,6 @@ function Bg() {
           attachFns={undefined}
         />
       </LayerMaterial>
-    </mesh>
+    </motion.mesh>
   )
 }

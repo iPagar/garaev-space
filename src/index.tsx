@@ -6,6 +6,7 @@ import Github from './images/Github.png'
 import { ReactComponent as Linkedin } from './images/Linkedin.svg'
 import { ReactComponent as Telegram } from './images/Telegram.svg'
 import styles from './index.module.css'
+import { createRoot } from 'react-dom/client'
 
 function Overlay() {
   return (
@@ -27,10 +28,11 @@ function Overlay() {
   )
 }
 
-ReactDOM.render(
+const container = document.getElementById('root')
+const root = createRoot(container!)
+root.render(
   <>
     <App />
     <Overlay />
-  </>,
-  document.getElementById('root')
+  </>
 )
