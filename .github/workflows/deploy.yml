@@ -33,3 +33,4 @@ jobs:
           source: "out/*"
           target: "/var/www/${{ github.event.repository.name }}"
           rm: true
+          strip_components: 1
