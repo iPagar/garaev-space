@@ -4,9 +4,10 @@ const mobileProjects = [
   "https://apps.apple.com/us/app/supplement-scanner-supplens/id6756219517",
 ];
 
-const websiteProjects = [
-  "https://arctida.io/en",
-  "https://stakeholders.arctida.io/en",
+const websiteProjects: string[] = [
+  // TODO: Add website projects
+  // "https://arctida.io/en",
+  // "https://stakeholders.arctida.io/en",
 ];
 
 export default function Home() {
