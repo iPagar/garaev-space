@@ -2,144 +2,151 @@ interface ProjectMetadata {
   title: string;
   description: string;
   image: string;
-}
-
-function extractMetaTag(html: string, property: string): string | null {
-  const ogRegex = new RegExp(
-    `<meta\\s+(?:property|name)=["']${property}["']\\s+content=["']([^"']+)["']`,
-    "i"
-  );
-  const match = html.match(ogRegex);
-  return match ? match[1] : null;
-}
-
-function extractTitle(html: string): string | null {
-  const jsonLd = extractJsonLd(html);
-  if (jsonLd?.name) return jsonLd.name;
-
-  const ogTitle = extractMetaTag(html, "og:title");
-  if (ogTitle) return ogTitle;
-
-  const titleRegex = /<title[^>]*>([^<]+)<\/title>/i;
-  const match = html.match(titleRegex);
-  return match ? match[1].trim() : null;
+  screenshots: string[];
 }
 
 function extractJsonLd(html: string): {
   name?: string;
   description?: string;
   image?: string;
+  screenshots?: string[];
 } | null {
-  const jsonLdRegex =
+  const regex =
     /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
-  const matches = Array.from(html.matchAll(jsonLdRegex));
-  if (matches.length === 0) return null;
+  const matches = Array.from(html.matchAll(regex));
 
   for (const match of matches) {
     try {
-      const jsonData = JSON.parse(match[1].trim());
-      const data = Array.isArray(jsonData) ? jsonData[0] : jsonData;
-      const type = data["@type"];
+      const data = JSON.parse(match[1].trim());
+      const item = Array.isArray(data) ? data[0] : data;
 
-      if (type === "SoftwareApplication") {
+      if (item["@type"] === "SoftwareApplication") {
+        const screenshots = item.screenshot || item.screenshots || [];
         return {
-          name: data.name,
-          description: data.description,
-          image: data.image,
+          name: item.name,
+          description: item.description,
+          image: item.image,
+          screenshots: Array.isArray(screenshots)
+            ? screenshots
+                .map((s: string | { url?: string }) =>
+                  typeof s === "string" ? s : s.url || ""
+                )
+                .filter(Boolean)
+            : [],
         };
       }
-    } catch (error) {
-      console.error("Error parsing JSON-LD:", error);
+    } catch {}
+  }
+
+  return null;
+}
+
+function extractIcon(html: string): string | null {
+  const containerRegex =
+    /<div[^>]*class=["'][^"']*app-icon-contianer[^"']*["'][^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/gi;
+  const matches = Array.from(html.matchAll(containerRegex));
+
+  for (const match of matches) {
+    const srcsetRegex = /srcset=["']([^"']+)["']/gi;
+    const srcsetMatches = Array.from(match[0].matchAll(srcsetRegex));
+
+    for (const srcsetMatch of srcsetMatches) {
+      const urls = srcsetMatch[1]
+        .split(",")
+        .map((item) => item.trim().split(/\s+/)[0])
+        .filter((url) => url.startsWith("http"));
+
+      let bestUrl: string | null = null;
+      let bestSize = 0;
+
+      for (const url of urls) {
+        const sizeMatch = url.match(/(\d+)x(\d+)/);
+        if (sizeMatch) {
+          const size = parseInt(sizeMatch[1], 10);
+          if (size > bestSize) {
+            bestUrl = url;
+            bestSize = size;
+          }
+        }
+      }
+
+      if (bestUrl) return bestUrl;
     }
   }
 
   return null;
 }
 
-function extractDescription(html: string): string | null {
-  const jsonLd = extractJsonLd(html);
-  if (jsonLd?.description) return jsonLd.description;
+function extractScreenshots(html: string): string[] {
+  const regex =
+    /https?:\/\/is[0-9]-ssl\.mzstatic\.com\/image\/thumb\/[^"'\s]+\.(jpg|jpeg|png|webp)/gi;
+  const matches = Array.from(html.matchAll(regex));
+  const screenshots: string[] = [];
 
-  const ogDesc = extractMetaTag(html, "og:description");
-  if (ogDesc) return ogDesc;
-
-  const metaDesc = extractMetaTag(html, "description");
-  if (metaDesc) return metaDesc;
-
-  return null;
-}
-
-function extractImage(html: string, baseUrl: string): string | null {
-  const jsonLd = extractJsonLd(html);
-  if (jsonLd?.image) {
-    const image = jsonLd.image;
-    if (image.startsWith("http")) return image;
-    if (image.startsWith("//")) return `https:${image}`;
-    if (image.startsWith("/")) {
-      const url = new URL(baseUrl);
-      return `${url.origin}${image}`;
+  for (const match of matches) {
+    const url = match[0];
+    if (
+      !url.includes("Placeholder") &&
+      !url.includes("AppIcon") &&
+      !url.includes("icon")
+    ) {
+      screenshots.push(url);
     }
-    return `${baseUrl}/${image}`;
   }
 
-  const ogImage = extractMetaTag(html, "og:image");
-  if (ogImage) {
-    if (ogImage.startsWith("http")) return ogImage;
-    if (ogImage.startsWith("//")) return `https:${ogImage}`;
-    if (ogImage.startsWith("/")) {
-      const url = new URL(baseUrl);
-      return `${url.origin}${ogImage}`;
+  const screenshotMap = new Map<string, { url: string; size: number }>();
+
+  for (const url of screenshots) {
+    const sizeMatch = url.match(/(\d+)x(\d+)/);
+    if (sizeMatch) {
+      const width = parseInt(sizeMatch[1], 10);
+      const height = parseInt(sizeMatch[2], 10);
+      if (width < 200 || height < 200) continue;
     }
-    return `${baseUrl}/${ogImage}`;
+
+    const basePathMatch = url.match(
+      /^(.+\/[^\/]+\.(png|jpg|jpeg|webp))\/\d+x\d+/i
+    );
+    const basePath = basePathMatch ? basePathMatch[1] : url;
+    const size = sizeMatch
+      ? parseInt(sizeMatch[1], 10) * parseInt(sizeMatch[2], 10)
+      : 0;
+
+    const existing = screenshotMap.get(basePath);
+    if (!existing || size > existing.size) {
+      screenshotMap.set(basePath, { url, size });
+    }
   }
 
-  const twitterImage = extractMetaTag(html, "twitter:image");
-  if (twitterImage) {
-    if (twitterImage.startsWith("http")) return twitterImage;
-    if (twitterImage.startsWith("//")) return `https:${twitterImage}`;
-    if (twitterImage.startsWith("/")) {
-      const url = new URL(baseUrl);
-      return `${url.origin}${twitterImage}`;
-    }
-    return `${baseUrl}/${twitterImage}`;
-  }
-
-  return null;
+  return Array.from(screenshotMap.values())
+    .map((s) => s.url)
+    .slice(0, 5);
 }
 
 export async function fetchProjectMetadata(
   url: string
 ): Promise<ProjectMetadata> {
-  try {
-    const response = await fetch(url, {
-      next: { revalidate: 86400 }, // Кэш на 24 часа
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      },
-    });
+  const response = await fetch(url, {
+    next: { revalidate: 86400 },
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    },
+  });
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch: ${response.status}`);
-    }
-
-    const html = await response.text();
-
-    const title = extractTitle(html) || "Project";
-    const description = extractDescription(html) || "";
-    const image = extractImage(html, url) || "";
-
-    return {
-      title,
-      description,
-      image,
-    };
-  } catch (error) {
-    console.error("Error fetching metadata for", url, error);
-    return {
-      title: new URL(url).hostname,
-      description: "",
-      image: "",
-    };
+  if (!response.ok) {
+    throw new Error(`Failed to fetch: ${response.status}`);
   }
+
+  const html = await response.text();
+  const jsonLd = extractJsonLd(html);
+
+  return {
+    title: jsonLd?.name || "",
+    description: jsonLd?.description || "",
+    image: extractIcon(html) || jsonLd?.image || "",
+    screenshots: jsonLd?.screenshots?.length
+      ? jsonLd.screenshots
+      : extractScreenshots(html),
+  };
 }
