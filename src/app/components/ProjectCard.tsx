@@ -6,22 +6,23 @@ interface ProjectCardProps {
 
 export default async function ProjectCard({ url }: ProjectCardProps) {
   const metadata = await fetchProjectMetadata(url);
+  const isWebsite = !url.includes("apps.apple.com");
 
   return (
     <a
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block animate-fade-in"
+      className="group block h-full animate-fade-in"
     >
-      <div className="rounded-lg border border-muted/20 bg-background p-6 transition-all duration-300 hover:border-muted/40">
+      <div className="flex h-full flex-col rounded-lg border border-muted/20 bg-background p-6 transition-all duration-300 hover:border-muted/40">
         <div className="mb-4 flex items-start gap-4">
           {metadata.image && (
-            <div className="shrink-0 overflow-hidden rounded-lg">
+            <div className="shrink-0 overflow-hidden rounded-lg bg-white p-1">
               <img
                 src={metadata.image}
                 alt={metadata.title}
-                className="h-16 w-16 object-cover transition-transform duration-300 group-hover:scale-105"
+                className="h-16 w-16 rounded-lg object-contain transition-transform duration-300 group-hover:scale-105"
               />
             </div>
           )}
@@ -37,13 +38,28 @@ export default async function ProjectCard({ url }: ProjectCardProps) {
           </div>
         </div>
         {metadata.screenshots && metadata.screenshots.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto pb-2">
+          <div
+            className={
+              isWebsite
+                ? "mt-auto overflow-hidden rounded-lg"
+                : "mt-auto flex gap-2 overflow-x-auto pb-2"
+            }
+          >
             {metadata.screenshots.map((screenshot, index) => (
-              <div key={index} className="shrink-0 overflow-hidden rounded-lg">
+              <div
+                key={index}
+                className={
+                  isWebsite ? "" : "shrink-0 overflow-hidden rounded-lg"
+                }
+              >
                 <img
                   src={screenshot}
                   alt={`${metadata.title} screenshot ${index + 1}`}
-                  className="h-32 w-auto object-cover transition-transform duration-300 group-hover:scale-105"
+                  className={
+                    isWebsite
+                      ? "h-40 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      : "h-32 w-auto object-cover transition-transform duration-300 group-hover:scale-105"
+                  }
                 />
               </div>
             ))}

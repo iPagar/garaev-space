@@ -123,6 +123,59 @@ function extractScreenshots(html: string): string[] {
     .slice(0, 5);
 }
 
+function extractOpenGraphMetadata(html: string): {
+  title?: string;
+  description?: string;
+  image?: string;
+} {
+  const ogTitleMatch = html.match(
+    /<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i
+  );
+  const ogDescriptionMatch = html.match(
+    /<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["']/i
+  );
+  const ogImageMatch = html.match(
+    /<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i
+  );
+
+  return {
+    title: ogTitleMatch ? ogTitleMatch[1] : undefined,
+    description: ogDescriptionMatch ? ogDescriptionMatch[1] : undefined,
+    image: ogImageMatch ? ogImageMatch[1] : undefined,
+  };
+}
+
+function extractFavicon(html: string): string | null {
+  // apple-touch-icon (лучшее качество)
+  const appleTouchIcon = html.match(
+    /<link[^>]*rel=["']apple-touch-icon["'][^>]*href=["']([^"']+)["']/i
+  );
+  if (appleTouchIcon) return appleTouchIcon[1];
+
+  // обычный favicon
+  const favicon = html.match(
+    /<link[^>]*rel=["'](?:icon|shortcut icon)["'][^>]*href=["']([^"']+)["']/i
+  );
+  if (favicon) return favicon[1];
+
+  return null;
+}
+
+function extractStandardMetadata(html: string): {
+  title?: string;
+  description?: string;
+} {
+  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+  const descriptionMatch = html.match(
+    /<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i
+  );
+
+  return {
+    title: titleMatch ? titleMatch[1] : undefined,
+    description: descriptionMatch ? descriptionMatch[1] : undefined,
+  };
+}
+
 export async function fetchProjectMetadata(
   url: string
 ): Promise<ProjectMetadata> {
@@ -139,14 +192,43 @@ export async function fetchProjectMetadata(
   }
 
   const html = await response.text();
-  const jsonLd = extractJsonLd(html);
+  const isAppStore = url.includes("apps.apple.com");
 
-  return {
-    title: jsonLd?.name || "",
-    description: jsonLd?.description || "",
-    image: extractIcon(html) || jsonLd?.image || "",
-    screenshots: jsonLd?.screenshots?.length
-      ? jsonLd.screenshots
-      : extractScreenshots(html),
-  };
+  if (isAppStore) {
+    // Обработка App Store страниц
+    const jsonLd = extractJsonLd(html);
+
+    return {
+      title: jsonLd?.name || "",
+      description: jsonLd?.description || "",
+      image: extractIcon(html) || jsonLd?.image || "",
+      screenshots: jsonLd?.screenshots?.length
+        ? jsonLd.screenshots
+        : extractScreenshots(html),
+    };
+  } else {
+    // Обработка вебсайтов
+    const ogMetadata = extractOpenGraphMetadata(html);
+    const standardMetadata = extractStandardMetadata(html);
+    const baseUrl = new URL(url);
+
+    // Иконка — favicon
+    let iconUrl = extractFavicon(html) || "";
+    if (iconUrl && !iconUrl.startsWith("http")) {
+      iconUrl = new URL(iconUrl, baseUrl).toString();
+    }
+
+    // Обложка — og:image
+    let coverUrl = ogMetadata.image || "";
+    if (coverUrl && !coverUrl.startsWith("http")) {
+      coverUrl = new URL(coverUrl, baseUrl).toString();
+    }
+
+    return {
+      title: ogMetadata.title || standardMetadata.title || "",
+      description: ogMetadata.description || standardMetadata.description || "",
+      image: iconUrl,
+      screenshots: coverUrl ? [coverUrl] : [],
+    };
+  }
 }

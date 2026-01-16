@@ -1,7 +1,12 @@
 import ProjectCard from "./components/ProjectCard";
 
-const projects = [
+const mobileProjects = [
   "https://apps.apple.com/us/app/supplement-scanner-supplens/id6756219517",
+];
+
+const websiteProjects = [
+  "https://arctida.io/en",
+  "https://stakeholders.arctida.io/en",
 ];
 
 export default function Home() {
@@ -24,11 +29,34 @@ export default function Home() {
         <h2 className="mb-8 animate-fade-in text-2xl font-light tracking-tight sm:text-3xl">
           Projects
         </h2>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((url) => (
-            <ProjectCard key={url} url={url} />
-          ))}
-        </div>
+
+        {/* Mobile Projects */}
+        {mobileProjects.length > 0 && (
+          <div className="mb-12">
+            <h3 className="mb-6 animate-fade-in text-xl font-light tracking-tight text-muted sm:text-2xl">
+              Mobile Apps
+            </h3>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {mobileProjects.map((url) => (
+                <ProjectCard key={url} url={url} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Website Projects */}
+        {websiteProjects.length > 0 && (
+          <div>
+            <h3 className="mb-6 animate-fade-in text-xl font-light tracking-tight text-muted sm:text-2xl">
+              Websites
+            </h3>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {websiteProjects.map((url) => (
+                <ProjectCard key={url} url={url} />
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Links & Footer */}
