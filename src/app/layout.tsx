@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pavel Garaev — ipagar",
-  description: "Personal website of Pavel Garaev",
+  title: "Pavel Garaev — Projects",
+  description: "Projects by Pavel Garaev",
 };
 
 export default function RootLayout({
