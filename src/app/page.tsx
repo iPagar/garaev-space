@@ -5,6 +5,7 @@ const mobileProjects = [
 ];
 
 const websiteProjects: string[] = [
+  "https://limemenu.org",
   // TODO: Add website projects
   // "https://arctida.io/en",
   // "https://stakeholders.arctida.io/en",
