@@ -5,124 +5,6 @@ interface ProjectMetadata {
   screenshots: string[];
 }
 
-function extractJsonLd(html: string): {
-  name?: string;
-  description?: string;
-  image?: string;
-  screenshots?: string[];
-} | null {
-  const regex =
-    /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
-  const matches = Array.from(html.matchAll(regex));
-
-  for (const match of matches) {
-    try {
-      const data = JSON.parse(match[1].trim());
-      const item = Array.isArray(data) ? data[0] : data;
-
-      if (item["@type"] === "SoftwareApplication") {
-        const screenshots = item.screenshot || item.screenshots || [];
-        return {
-          name: item.name,
-          description: item.description,
-          image: item.image,
-          screenshots: Array.isArray(screenshots)
-            ? screenshots
-                .map((s: string | { url?: string }) =>
-                  typeof s === "string" ? s : s.url || ""
-                )
-                .filter(Boolean)
-            : [],
-        };
-      }
-    } catch {}
-  }
-
-  return null;
-}
-
-function extractIcon(html: string): string | null {
-  const containerRegex =
-    /<div[^>]*class=["'][^"']*app-icon-contianer[^"']*["'][^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/gi;
-  const matches = Array.from(html.matchAll(containerRegex));
-
-  for (const match of matches) {
-    const srcsetRegex = /srcset=["']([^"']+)["']/gi;
-    const srcsetMatches = Array.from(match[0].matchAll(srcsetRegex));
-
-    for (const srcsetMatch of srcsetMatches) {
-      const urls = srcsetMatch[1]
-        .split(",")
-        .map((item) => item.trim().split(/\s+/)[0])
-        .filter((url) => url.startsWith("http"));
-
-      let bestUrl: string | null = null;
-      let bestSize = 0;
-
-      for (const url of urls) {
-        const sizeMatch = url.match(/(\d+)x(\d+)/);
-        if (sizeMatch) {
-          const size = parseInt(sizeMatch[1], 10);
-          if (size > bestSize) {
-            bestUrl = url;
-            bestSize = size;
-          }
-        }
-      }
-
-      if (bestUrl) return bestUrl;
-    }
-  }
-
-  return null;
-}
-
-function extractScreenshots(html: string): string[] {
-  const regex =
-    /https?:\/\/is[0-9]-ssl\.mzstatic\.com\/image\/thumb\/[^"'\s]+\.(jpg|jpeg|png|webp)/gi;
-  const matches = Array.from(html.matchAll(regex));
-  const screenshots: string[] = [];
-
-  for (const match of matches) {
-    const url = match[0];
-    if (
-      !url.includes("Placeholder") &&
-      !url.includes("AppIcon") &&
-      !url.includes("icon")
-    ) {
-      screenshots.push(url);
-    }
-  }
-
-  const screenshotMap = new Map<string, { url: string; size: number }>();
-
-  for (const url of screenshots) {
-    const sizeMatch = url.match(/(\d+)x(\d+)/);
-    if (sizeMatch) {
-      const width = parseInt(sizeMatch[1], 10);
-      const height = parseInt(sizeMatch[2], 10);
-      if (width < 200 || height < 200) continue;
-    }
-
-    const basePathMatch = url.match(
-      /^(.+\/[^\/]+\.(png|jpg|jpeg|webp))\/\d+x\d+/i
-    );
-    const basePath = basePathMatch ? basePathMatch[1] : url;
-    const size = sizeMatch
-      ? parseInt(sizeMatch[1], 10) * parseInt(sizeMatch[2], 10)
-      : 0;
-
-    const existing = screenshotMap.get(basePath);
-    if (!existing || size > existing.size) {
-      screenshotMap.set(basePath, { url, size });
-    }
-  }
-
-  return Array.from(screenshotMap.values())
-    .map((s) => s.url)
-    .slice(0, 5);
-}
-
 function extractOpenGraphMetadata(html: string): {
   title?: string;
   description?: string;
@@ -179,6 +61,49 @@ function extractStandardMetadata(html: string): {
 export async function fetchProjectMetadata(
   url: string
 ): Promise<ProjectMetadata> {
+  const isAppStore = url.includes("apps.apple.com");
+
+  if (isAppStore) {
+    // Официальный iTunes Lookup API вместо парсинга HTML
+    const idFromSlug = url.match(/\/id(\d+)/)?.[1];
+    const idFromPath = url.match(/\/app\/(\d+)(?:\?|$)/)?.[1];
+    const id = idFromSlug ?? idFromPath;
+    if (!id) {
+      throw new Error(`Could not extract App Store ID from URL: ${url}`);
+    }
+    const lookupRes = await fetch(`https://itunes.apple.com/lookup?id=${id}`, {
+      next: { revalidate: 86400 },
+    });
+    if (!lookupRes.ok) {
+      throw new Error(`iTunes Lookup failed: ${lookupRes.status}`);
+    }
+    const lookup = (await lookupRes.json()) as {
+      resultCount: number;
+      results?: Array<{
+        trackName?: string;
+        description?: string;
+        artworkUrl512?: string;
+        artworkUrl100?: string;
+        screenshotUrls?: string[];
+        ipadScreenshotUrls?: string[];
+      }>;
+    };
+    const app = lookup.results?.[0];
+    if (!app) {
+      throw new Error(`App not found for ID: ${id}`);
+    }
+    const screenshots =
+      app.screenshotUrls?.slice(0, 5) ??
+      app.ipadScreenshotUrls?.slice(0, 5) ??
+      [];
+    return {
+      title: app.trackName ?? "",
+      description: app.description ?? "",
+      image: app.artworkUrl512 ?? app.artworkUrl100 ?? "",
+      screenshots,
+    };
+  }
+
   const response = await fetch(url, {
     next: { revalidate: 86400 },
     headers: {
@@ -192,21 +117,8 @@ export async function fetchProjectMetadata(
   }
 
   const html = await response.text();
-  const isAppStore = url.includes("apps.apple.com");
 
-  if (isAppStore) {
-    // Обработка App Store страниц
-    const jsonLd = extractJsonLd(html);
-
-    return {
-      title: jsonLd?.name || "",
-      description: jsonLd?.description || "",
-      image: extractIcon(html) || jsonLd?.image || "",
-      screenshots: jsonLd?.screenshots?.length
-        ? jsonLd.screenshots
-        : extractScreenshots(html),
-    };
-  } else {
+  {
     // Обработка вебсайтов
     const ogMetadata = extractOpenGraphMetadata(html);
     const standardMetadata = extractStandardMetadata(html);

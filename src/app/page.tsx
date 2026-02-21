@@ -2,6 +2,7 @@ import ProjectCard from "./components/ProjectCard";
 
 const mobileProjects = [
   "https://apps.apple.com/us/app/supplement-scanner-supplens/id6756219517",
+  "https://apps.apple.com/app/6758587114",
 ];
 
 const websiteProjects: string[] = [

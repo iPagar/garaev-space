@@ -18,7 +18,7 @@ export default async function ProjectCard({ url }: ProjectCardProps) {
       <div className="flex h-full flex-col rounded-lg border border-muted/20 bg-background p-6 transition-all duration-300 hover:border-muted/40">
         <div className="mb-4 flex items-start gap-4">
           {metadata.image && (
-            <div className="shrink-0 overflow-hidden rounded-lg bg-white p-1">
+            <div className="shrink-0 overflow-hidden rounded-lg bg-white">
               <img
                 src={metadata.image}
                 alt={metadata.title}
