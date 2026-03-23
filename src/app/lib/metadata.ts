@@ -11,13 +11,13 @@ function extractOpenGraphMetadata(html: string): {
   image?: string;
 } {
   const ogTitleMatch = html.match(
-    /<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i
+    /<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i,
   );
   const ogDescriptionMatch = html.match(
-    /<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["']/i
+    /<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["']/i,
   );
   const ogImageMatch = html.match(
-    /<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i
+    /<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i,
   );
 
   return {
@@ -30,13 +30,13 @@ function extractOpenGraphMetadata(html: string): {
 function extractFavicon(html: string): string | null {
   // apple-touch-icon (лучшее качество)
   const appleTouchIcon = html.match(
-    /<link[^>]*rel=["']apple-touch-icon["'][^>]*href=["']([^"']+)["']/i
+    /<link[^>]*rel=["']apple-touch-icon["'][^>]*href=["']([^"']+)["']/i,
   );
   if (appleTouchIcon) return appleTouchIcon[1];
 
   // обычный favicon
   const favicon = html.match(
-    /<link[^>]*rel=["'](?:icon|shortcut icon)["'][^>]*href=["']([^"']+)["']/i
+    /<link[^>]*rel=["'](?:icon|shortcut icon)["'][^>]*href=["']([^"']+)["']/i,
   );
   if (favicon) return favicon[1];
 
@@ -49,7 +49,7 @@ function extractStandardMetadata(html: string): {
 } {
   const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
   const descriptionMatch = html.match(
-    /<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i
+    /<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i,
   );
 
   return {
@@ -59,7 +59,7 @@ function extractStandardMetadata(html: string): {
 }
 
 export async function fetchProjectMetadata(
-  url: string
+  url: string,
 ): Promise<ProjectMetadata> {
   const isAppStore = url.includes("apps.apple.com");
 

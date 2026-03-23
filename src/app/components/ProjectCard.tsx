@@ -13,9 +13,9 @@ export default async function ProjectCard({ url }: ProjectCardProps) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block h-full animate-fade-in"
+      className="group block h-full"
     >
-      <div className="flex h-full flex-col rounded-lg border border-muted/20 bg-background p-6 transition-all duration-300 hover:border-muted/40">
+      <div className="flex h-full flex-col rounded-lg border border-zinc-700/40 bg-zinc-950 p-6 transition-all duration-300 hover:border-zinc-600/60">
         <div className="mb-4 flex items-start gap-4">
           {metadata.image && (
             <div className="shrink-0 overflow-hidden rounded-lg bg-white">
@@ -27,11 +27,11 @@ export default async function ProjectCard({ url }: ProjectCardProps) {
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <h3 className="mb-2 text-xl font-light text-foreground transition-colors duration-300 group-hover:text-foreground">
+            <h3 className="mb-2 text-xl font-light text-zinc-100 transition-colors duration-300 group-hover:text-zinc-100">
               {metadata.title}
             </h3>
             {metadata.description && (
-              <p className="text-sm leading-relaxed text-muted line-clamp-2">
+              <p className="line-clamp-2 text-sm leading-relaxed text-zinc-500">
                 {metadata.description}
               </p>
             )}
@@ -47,7 +47,7 @@ export default async function ProjectCard({ url }: ProjectCardProps) {
           >
             {metadata.screenshots.map((screenshot, index) => (
               <div
-                key={index}
+                key={screenshot}
                 className={
                   isWebsite ? "" : "shrink-0 overflow-hidden rounded-lg"
                 }
