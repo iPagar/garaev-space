@@ -3,63 +3,213 @@ import BlogCard from "./components/BlogCard";
 import ProjectCard from "./components/ProjectCard";
 import { getLatestPosts } from "./lib/blog";
 
-const mobileProjects = [
+const socialLinks = [
+  {
+    href: "https://t.me/ipagar",
+    label: "Telegram",
+  },
+  {
+    href: "https://linkedin.com/in/ipagar",
+    label: "LinkedIn",
+  },
+];
+
+const ownMobileProjects = [
   "https://apps.apple.com/us/app/supplement-scanner-supplens/id6756219517",
   "https://apps.apple.com/app/6758587114",
 ];
 
-const websiteProjects: string[] = [
-  "https://limemenu.org",
-  // TODO: Add website projects
+const ownWebsiteProjects: string[] = ["https://limemenu.org"];
+
+const clientProjects: string[] = [
   // "https://arctida.io/en",
   // "https://stakeholders.arctida.io/en",
+  // "https://dumabingo.org",
+  // "https://tritrace.io/en",
 ];
 
 export default async function Home() {
   const latestPosts = await getLatestPosts(3);
+  const ownProjectsCount = ownMobileProjects.length + ownWebsiteProjects.length;
 
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100">
-      {/* Header */}
-      <section className="container mx-auto px-6 pt-12 pb-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-light tracking-tight sm:text-4xl md:text-5xl">
-            Pavel Garaev
-          </h1>
-          <p className="mt-2 font-mono text-sm text-zinc-500 sm:text-base">
-            @ipagar
-          </p>
+      <section className="border-b border-zinc-800/80 bg-[radial-gradient(circle_at_top_left,rgba(244,244,245,0.08),transparent_36%),linear-gradient(180deg,rgba(24,24,27,0.98),rgba(9,9,11,1))]">
+        <div className="container mx-auto px-6 pt-8 pb-16 sm:pt-10 sm:pb-20">
+          <div className="mb-12 flex items-center justify-between gap-6">
+            <div>
+              <p className="text-xs uppercase tracking-[0.32em] text-zinc-500">
+                Pavel Garaev
+              </p>
+              <p className="mt-2 font-mono text-sm text-zinc-400 sm:text-base">
+                @ipagar
+              </p>
+            </div>
+
+            <div className="hidden items-center gap-6 sm:flex">
+              {socialLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-zinc-500 transition-colors duration-300 hover:text-zinc-100"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.8fr)] lg:items-end">
+            <div className="max-w-4xl">
+              <h1 className="max-w-3xl text-4xl font-light leading-tight tracking-tight sm:text-5xl md:text-6xl">
+                I build my own products and ship digital work for clients.
+              </h1>
+              <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-400 sm:text-lg">
+                This site brings together my own projects, client work, and
+                notes on product and engineering.
+              </p>
+
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+                <a
+                  href="#projects"
+                  className="inline-flex items-center justify-center rounded-full border border-zinc-700 bg-zinc-100 px-5 py-3 text-sm text-zinc-950 transition-colors duration-300 hover:bg-zinc-200"
+                >
+                  View projects
+                </a>
+                <Link
+                  href="/blog"
+                  className="inline-flex items-center justify-center rounded-full border border-zinc-700 px-5 py-3 text-sm text-zinc-200 transition-colors duration-300 hover:border-zinc-500 hover:text-zinc-100"
+                >
+                  Read blog
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
+                <p className="text-xs uppercase tracking-[0.28em] text-zinc-500">
+                  Own Projects
+                </p>
+                <p className="mt-4 text-3xl font-light tracking-tight text-zinc-100">
+                  {ownProjectsCount}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-zinc-400">
+                  Products I built and continue to shape myself.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
+                <p className="text-xs uppercase tracking-[0.28em] text-zinc-500">
+                  Client Work
+                </p>
+                <p className="mt-4 text-3xl font-light tracking-tight text-zinc-100">
+                  {clientProjects.length}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-zinc-400">
+                  Websites and platforms delivered for clients.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
+                <p className="text-xs uppercase tracking-[0.28em] text-zinc-500">
+                  Writing
+                </p>
+                <p className="mt-4 text-3xl font-light tracking-tight text-zinc-100">
+                  {latestPosts.length}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-zinc-400">
+                  Notes on building, shipping, and keeping things simple.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-wrap gap-4 sm:hidden">
+            {socialLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-zinc-500 transition-colors duration-300 hover:text-zinc-100"
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Projects */}
-      <section className="container mx-auto px-6 py-8">
-        <h2 className="mb-8 text-2xl font-light tracking-tight sm:text-3xl">
-          Projects
-        </h2>
+      <section id="projects" className="container mx-auto px-6 py-16 sm:py-20">
+        <div className="mb-10 max-w-3xl">
+          <p className="text-xs uppercase tracking-[0.32em] text-zinc-500">
+            Work
+          </p>
+          <h2 className="mt-3 text-3xl font-light tracking-tight sm:text-4xl">
+            Selected projects
+          </h2>
+          <p className="mt-4 text-base leading-8 text-zinc-400 sm:text-lg">
+            A selection of apps, websites, and client projects.
+          </p>
+        </div>
 
-        {/* Mobile Projects */}
-        {mobileProjects.length > 0 && (
-          <div className="mb-12">
-            <h3 className="mb-6 text-xl font-light tracking-tight text-zinc-500 sm:text-2xl">
-              Mobile Apps
-            </h3>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {mobileProjects.map((url) => (
-                <ProjectCard key={url} url={url} />
-              ))}
+        {(ownMobileProjects.length > 0 || ownWebsiteProjects.length > 0) && (
+          <div className="mb-12 rounded-3xl border border-zinc-800 bg-zinc-900/40 p-6 sm:p-8">
+            <div className="mb-8">
+              <div>
+                <p className="text-xs uppercase tracking-[0.28em] text-zinc-500">
+                  Own Projects
+                </p>
+                <h3 className="mt-3 text-2xl font-light tracking-tight sm:text-3xl">
+                  Apps and websites I build for myself
+                </h3>
+              </div>
             </div>
+
+            {ownMobileProjects.length > 0 && (
+              <div className={ownWebsiteProjects.length > 0 ? "mb-10" : ""}>
+                <h4 className="mb-6 text-lg font-light tracking-tight text-zinc-300 sm:text-xl">
+                  Mobile Apps
+                </h4>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {ownMobileProjects.map((url) => (
+                    <ProjectCard key={url} url={url} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {ownWebsiteProjects.length > 0 && (
+              <div>
+                <h4 className="mb-6 text-lg font-light tracking-tight text-zinc-300 sm:text-xl">
+                  Websites
+                </h4>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {ownWebsiteProjects.map((url) => (
+                    <ProjectCard key={url} url={url} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Website Projects */}
-        {websiteProjects.length > 0 && (
-          <div>
-            <h3 className="mb-6 text-xl font-light tracking-tight text-zinc-500 sm:text-2xl">
-              Websites
-            </h3>
+        {clientProjects.length > 0 && (
+          <div className="rounded-3xl border border-zinc-800 bg-zinc-900/20 p-6 sm:p-8">
+            <div className="mb-8">
+              <div>
+                <p className="text-xs uppercase tracking-[0.28em] text-zinc-500">
+                  Client Work
+                </p>
+                <h3 className="mt-3 text-2xl font-light tracking-tight sm:text-3xl">
+                  Products delivered for clients
+                </h3>
+              </div>
+            </div>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {websiteProjects.map((url) => (
+              {clientProjects.map((url) => (
                 <ProjectCard key={url} url={url} />
               ))}
             </div>
@@ -67,15 +217,19 @@ export default async function Home() {
         )}
       </section>
 
-      <section className="container mx-auto px-6 py-8">
+      <section className="container mx-auto px-6 py-16 sm:py-20">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.32em] text-zinc-500">
               Writing
             </p>
-            <h2 className="mt-3 text-2xl font-light tracking-tight sm:text-3xl">
+            <h2 className="mt-3 text-3xl font-light tracking-tight sm:text-4xl">
               Blog
             </h2>
+            <p className="mt-4 max-w-2xl text-base leading-8 text-zinc-400 sm:text-lg">
+              Short notes on product work, engineering decisions, and keeping
+              things simple enough to ship.
+            </p>
           </div>
           <Link
             href="/blog"
@@ -92,10 +246,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Links & Footer */}
       <section className="container mx-auto px-6 py-12">
         <div className="flex justify-center gap-8">
-          {/* Telegram */}
           <a
             href="https://t.me/ipagar"
             target="_blank"
@@ -114,7 +266,6 @@ export default async function Home() {
             <span className="font-light text-sm">Telegram</span>
           </a>
 
-          {/* LinkedIn */}
           <a
             href="https://linkedin.com/in/ipagar"
             target="_blank"

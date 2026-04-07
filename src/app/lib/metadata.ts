@@ -27,20 +27,87 @@ function extractOpenGraphMetadata(html: string): {
   };
 }
 
-function extractFavicon(html: string): string | null {
-  // apple-touch-icon (лучшее качество)
-  const appleTouchIcon = html.match(
-    /<link[^>]*rel=["']apple-touch-icon["'][^>]*href=["']([^"']+)["']/i,
+function extractLinkAttribute(tag: string, attribute: string): string | null {
+  const attributeMatch = tag.match(
+    new RegExp(`${attribute}\\s*=\\s*["']([^"']+)["']`, "i"),
   );
-  if (appleTouchIcon) return appleTouchIcon[1];
 
-  // обычный favicon
-  const favicon = html.match(
-    /<link[^>]*rel=["'](?:icon|shortcut icon)["'][^>]*href=["']([^"']+)["']/i,
+  return (
+    attributeMatch?.[1]
+      ?.replace(/&amp;/gi, "&")
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;/gi, "'")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">") ?? null
   );
-  if (favicon) return favicon[1];
+}
+
+function getIconKind(rel: string): "icon" | "apple-touch-icon" | null {
+  const relTokens = rel.toLowerCase().split(/\s+/).filter(Boolean);
+
+  if (relTokens.includes("apple-touch-icon")) {
+    return "apple-touch-icon";
+  }
+
+  if (relTokens.includes("icon")) {
+    return "icon";
+  }
 
   return null;
+}
+
+function parseIconSize(sizes: string | null): number {
+  if (!sizes) return 0;
+
+  const normalizedSizes = sizes.trim().toLowerCase();
+  if (normalizedSizes === "any") {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  let largestSize = 0;
+
+  for (const sizeMatch of normalizedSizes.matchAll(/(\d+)x(\d+)/g)) {
+    const width = Number(sizeMatch[1]);
+    const height = Number(sizeMatch[2]);
+
+    largestSize = Math.max(largestSize, width, height);
+  }
+
+  return largestSize;
+}
+
+function extractFavicon(html: string): string | null {
+  const linkTags = html.match(/<link\b[^>]*>/gi) ?? [];
+
+  let fallbackUrl: string | null = null;
+  let bestUrl: string | null = null;
+  let bestSize = -1;
+  let bestPriority = -1;
+
+  for (const tag of linkTags) {
+    const rel = extractLinkAttribute(tag, "rel");
+    const href = extractLinkAttribute(tag, "href");
+
+    if (!rel || !href) continue;
+
+    const iconKind = getIconKind(rel);
+    if (!iconKind) continue;
+
+    if (!fallbackUrl) {
+      fallbackUrl = href;
+    }
+
+    const size = parseIconSize(extractLinkAttribute(tag, "sizes"));
+    const priority = iconKind === "icon" ? 1 : 0;
+
+    if (size > bestSize || (size === bestSize && priority > bestPriority)) {
+      bestUrl = href;
+      bestSize = size;
+      bestPriority = priority;
+    }
+  }
+
+  return bestUrl ?? fallbackUrl;
 }
 
 function extractStandardMetadata(html: string): {
