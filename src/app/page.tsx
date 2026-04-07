@@ -100,17 +100,19 @@ export default async function Home() {
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
-                <p className="text-xs uppercase tracking-[0.28em] text-zinc-500">
-                  Client Work
-                </p>
-                <p className="mt-4 text-3xl font-light tracking-tight text-zinc-100">
-                  {clientProjects.length}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-zinc-400">
-                  Websites and platforms delivered for clients.
-                </p>
-              </div>
+              {clientProjects.length > 0 && (
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
+                  <p className="text-xs uppercase tracking-[0.28em] text-zinc-500">
+                    Client Work
+                  </p>
+                  <p className="mt-4 text-3xl font-light tracking-tight text-zinc-100">
+                    {clientProjects.length}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-zinc-400">
+                    Websites and platforms delivered for clients.
+                  </p>
+                </div>
+              )}
 
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
                 <p className="text-xs uppercase tracking-[0.28em] text-zinc-500">
