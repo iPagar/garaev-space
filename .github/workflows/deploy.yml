@@ -8,6 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
 
     steps:
       - uses: actions/checkout@v4
@@ -20,6 +22,13 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Validate required env
+        run: |
+          if [ -z "$NEXT_PUBLIC_SITE_URL" ]; then
+            echo "NEXT_PUBLIC_SITE_URL is not set. Add it in GitHub: Settings -> Secrets and variables -> Actions -> Variables"
+            exit 1
+          fi
 
       - name: Build
         run: npm run build
