@@ -5,9 +5,10 @@ import {
   budgetRanges,
   buildProjectInquirySummary,
   contactConfig,
+  getProjectInquiryFeedbackMessage,
   initialProjectInquiryValues,
-  type ProjectInquiryActionState,
   type PreferredLanguage,
+  type ProjectInquiryActionState,
   type ProjectInquiryValues,
   preferredLanguages,
   projectStages,
@@ -128,8 +129,7 @@ export async function submitProjectInquiry(
     !isAllowedChoice(values.budgetRange, budgetRanges)
   ) {
     return {
-      message:
-        "Please fill out the required fields before sending the inquiry.",
+      message: getProjectInquiryFeedbackMessage("validationError"),
       status: "error",
       values,
     };
@@ -139,8 +139,7 @@ export async function submitProjectInquiry(
 
   if (!smtpConfig) {
     return {
-      message:
-        "SMTP is not configured yet. Add the SMTP env variables and try again.",
+      message: getProjectInquiryFeedbackMessage("deliveryUnavailable"),
       status: "error",
       values,
     };
@@ -164,15 +163,13 @@ export async function submitProjectInquiry(
     });
 
     return {
-      message:
-        "Your inquiry has been sent. I will get back to you by email or Telegram.",
+      message: getProjectInquiryFeedbackMessage("success"),
       status: "success",
       values: initialProjectInquiryValues,
     };
   } catch {
     return {
-      message:
-        "The inquiry could not be sent. Check SMTP settings and try again.",
+      message: getProjectInquiryFeedbackMessage("deliveryUnavailable"),
       status: "error",
       values,
     };

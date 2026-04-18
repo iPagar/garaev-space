@@ -24,6 +24,11 @@ export type ProjectInquiryActionState = {
   values: ProjectInquiryValues;
 };
 
+type ProjectInquiryFeedbackKey =
+  | "validationError"
+  | "deliveryUnavailable"
+  | "success";
+
 export const preferredLanguages = [
   {
     value: "russian",
@@ -98,4 +103,21 @@ export function buildProjectInquirySummary(values: ProjectInquiryValues) {
     "Brief:",
     values.message.trim() || "-",
   ].join("\n");
+}
+
+export function getProjectInquiryFeedbackMessage(
+  key: ProjectInquiryFeedbackKey,
+) {
+  const errorMessages = {
+    deliveryUnavailable:
+      "The message did not go through. Please try again or contact me by email or Telegram.",
+    validationError:
+      "Please fill out the required fields before sending the inquiry.",
+  } satisfies Record<Exclude<ProjectInquiryFeedbackKey, "success">, string>;
+
+  if (key !== "success") {
+    return errorMessages[key];
+  }
+
+  return "Your inquiry has been sent. I will get back to you by email or Telegram.";
 }
