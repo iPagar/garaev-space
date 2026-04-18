@@ -153,7 +153,7 @@ export default async function Home() {
               <p className="mt-4 text-lg/8 text-zinc-400">
                 {featuredPost.excerpt}
               </p>
-              <div className="mt-4 flex flex-col justify-between gap-6 sm:mt-8 sm:flex-row-reverse sm:gap-8 lg:mt-4 lg:flex-col">
+              <div className="mt-6 flex flex-col gap-6 sm:mt-8 lg:mt-6">
                 <div className="flex">
                   <Link
                     href={`/blog/${featuredPost.slug}`}
@@ -163,12 +163,12 @@ export default async function Home() {
                     Continue reading <span aria-hidden="true">&rarr;</span>
                   </Link>
                 </div>
-                <div className="flex lg:border-t lg:border-zinc-800/80 lg:pt-8">
+                <div className="flex border-t border-zinc-800/80 pt-6">
                   <Link
                     href="/blog"
-                    className="flex gap-x-2.5 text-sm/6 font-semibold text-zinc-100"
+                    className="text-sm/6 font-medium text-zinc-400 transition hover:text-zinc-100"
                   >
-                    Read all posts <span aria-hidden="true">&rarr;</span>
+                    Read all posts
                   </Link>
                 </div>
               </div>
