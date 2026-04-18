@@ -46,19 +46,19 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const blocks = parseMarkdown(post.body);
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100">
-      <section className="container mx-auto px-6 pt-12 pb-20">
+    <main className="site-shell min-h-screen px-6 py-8 sm:px-8 lg:px-12">
+      <section className="mx-auto max-w-5xl">
         <Link
           href="/blog"
-          className="inline-flex items-center gap-2 text-sm text-zinc-500 transition-colors duration-300 hover:text-zinc-100"
+          className="inline-flex items-center gap-2 rounded-full border border-zinc-700/60 px-4 py-2 text-sm text-zinc-400 hover:border-zinc-500 hover:text-zinc-100"
         >
           <span aria-hidden="true">←</span>
           All posts
         </Link>
 
-        <article className="mx-auto mt-10 max-w-3xl">
-          <header className="border-b border-zinc-700/30 pb-8">
-            <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.24em] text-zinc-500">
+        <article className="mt-6 rounded-[2rem] border border-zinc-800/80 bg-zinc-900/40 px-6 py-10 sm:px-10 sm:py-14">
+          <header className="border-b border-zinc-800/80 pb-8">
+            <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-zinc-400">
               <time dateTime={post.publishedAt}>
                 {new Intl.DateTimeFormat("en", {
                   day: "numeric",
@@ -69,18 +69,18 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               <span>{post.readingTime}</span>
             </div>
 
-            <h1 className="mt-5 text-4xl font-light tracking-tight sm:text-5xl">
+            <h1 className="mt-6 text-5xl font-semibold tracking-tight text-zinc-100 sm:text-6xl">
               {post.title}
             </h1>
-            <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-500">
+            <p className="mt-6 max-w-3xl text-lg leading-8 text-zinc-400">
               {post.excerpt}
             </p>
 
-            <div className="mt-6 flex flex-wrap gap-2">
+            <div className="mt-8 flex flex-wrap gap-2">
               {post.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full border border-zinc-700/40 px-3 py-1 text-xs text-zinc-500"
+                  className="rounded-full border border-zinc-800/80 bg-zinc-950 px-3 py-1 text-xs text-zinc-400"
                 >
                   {tag}
                 </span>
@@ -97,7 +97,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                   return (
                     <h2
                       key={key}
-                      className="text-2xl font-light tracking-tight text-zinc-100"
+                      className="pt-4 text-3xl font-semibold tracking-tight text-zinc-100"
                     >
                       {block.content}
                     </h2>
@@ -107,7 +107,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 return (
                   <h3
                     key={key}
-                    className="text-xl font-light tracking-tight text-zinc-100"
+                    className="pt-2 text-2xl font-semibold tracking-tight text-zinc-100"
                   >
                     {block.content}
                   </h3>
@@ -116,10 +116,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
               if (block.type === "paragraph") {
                 return (
-                  <p
-                    key={key}
-                    className="text-[1.05rem] leading-[1.95] text-zinc-200/85"
-                  >
+                  <p key={key} className="text-lg leading-9 text-zinc-200/90">
                     {block.content}
                   </p>
                 );
@@ -129,7 +126,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 return (
                   <ul
                     key={key}
-                    className="grid list-disc gap-3 pl-6 text-[1.05rem] leading-[1.95] text-zinc-200/85 marker:text-zinc-500"
+                    className="grid list-disc gap-3 pl-6 text-lg leading-9 text-zinc-200/90 marker:text-zinc-500"
                   >
                     {block.items.map((item) => (
                       <li key={item}>{item}</li>
@@ -142,7 +139,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 return (
                   <ol
                     key={key}
-                    className="grid list-decimal gap-3 pl-6 text-[1.05rem] leading-[1.95] text-zinc-200/85 marker:text-zinc-500"
+                    className="grid list-decimal gap-3 pl-6 text-lg leading-9 text-zinc-200/90 marker:text-zinc-500"
                   >
                     {block.items.map((item) => (
                       <li key={item}>{item}</li>
@@ -155,7 +152,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 return (
                   <blockquote
                     key={key}
-                    className="border-l border-zinc-700 pl-5 text-[1.05rem] italic leading-[1.95] text-zinc-300"
+                    className="rounded-r-[1.5rem] border-l-2 border-zinc-700 px-6 py-5 text-lg italic leading-9 text-zinc-300"
                   >
                     {block.content}
                   </blockquote>
@@ -165,7 +162,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               return (
                 <pre
                   key={key}
-                  className="overflow-x-auto rounded-2xl border border-zinc-800 bg-zinc-900 p-5 text-sm leading-7 text-zinc-200"
+                  className="overflow-x-auto rounded-[1.5rem] border border-zinc-800/80 bg-zinc-950 p-5 text-sm leading-7 text-zinc-100"
                 >
                   <code>{block.content}</code>
                 </pre>
