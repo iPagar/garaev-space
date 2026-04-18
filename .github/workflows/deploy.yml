@@ -8,8 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      PORT: ${{ vars.PORT }}
     steps:
       - name: Deploy and build on server
         uses: appleboy/ssh-action@master
@@ -22,7 +20,7 @@ jobs:
             app_dir="/opt/$container_name"
             env_file="$app_dir/.env"
             repo_dir="$app_dir/repo"
-            port_mapping="127.0.0.1:${PORT:-3000}:3000"
+            port_mapping="127.0.0.1:${{ vars.PORT || '3000' }}:3000"
 
             mkdir -p "$app_dir"
             echo "${{ vars.ENV }}" > "$env_file"
