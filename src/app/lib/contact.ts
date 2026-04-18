@@ -18,6 +18,12 @@ export type ProjectInquiryValues = {
   timeline: string;
 };
 
+export type ProjectInquiryActionState = {
+  message: string;
+  status: "idle" | "success" | "error";
+  values: ProjectInquiryValues;
+};
+
 export const preferredLanguages = [
   {
     value: "russian",
@@ -62,6 +68,12 @@ export const initialProjectInquiryValues: ProjectInquiryValues = {
   preferredLanguage: preferredLanguages[0].value,
   projectStage: projectStages[0],
   timeline: projectTimelines[1],
+};
+
+export const initialProjectInquiryActionState: ProjectInquiryActionState = {
+  message: "",
+  status: "idle",
+  values: initialProjectInquiryValues,
 };
 
 export function getLanguageLabel(language: PreferredLanguage) {

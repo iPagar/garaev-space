@@ -6,18 +6,13 @@ import {
   buildProjectInquirySummary,
   contactConfig,
   initialProjectInquiryValues,
+  type ProjectInquiryActionState,
   type PreferredLanguage,
   type ProjectInquiryValues,
   preferredLanguages,
   projectStages,
   projectTimelines,
 } from "../lib/contact";
-
-export type ProjectInquiryActionState = {
-  message: string;
-  status: "idle" | "success" | "error";
-  values: ProjectInquiryValues;
-};
 
 function normalizeValue(value: FormDataEntryValue | null) {
   return typeof value === "string" ? value.trim() : "";
@@ -117,12 +112,6 @@ function getSmtpConfig() {
     to,
   };
 }
-
-export const initialProjectInquiryActionState: ProjectInquiryActionState = {
-  message: "",
-  status: "idle",
-  values: initialProjectInquiryValues,
-};
 
 export async function submitProjectInquiry(
   _previousState: ProjectInquiryActionState,

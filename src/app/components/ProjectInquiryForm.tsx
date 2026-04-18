@@ -3,18 +3,16 @@
 import { useActionState, useEffect, useId, useState } from "react";
 import { useFormStatus } from "react-dom";
 import {
-  initialProjectInquiryActionState,
-  submitProjectInquiry,
-} from "../contact/actions";
-import {
   budgetRanges,
   contactConfig,
+  initialProjectInquiryActionState,
   initialProjectInquiryValues,
   type ProjectInquiryValues,
   preferredLanguages,
   projectStages,
   projectTimelines,
 } from "../lib/contact";
+import { submitProjectInquiry } from "../contact/actions";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
