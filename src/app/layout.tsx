@@ -22,7 +22,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${sans.variable} bg-stone-950 text-stone-100 antialiased`}>
+      <body
+        className={`${sans.variable} bg-stone-950 text-stone-100 antialiased`}
+      >
         <noscript>
           <iframe
             src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}

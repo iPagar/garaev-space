@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import ContactCta from "./components/ContactCta";
 import ProjectCard from "./components/ProjectCard";
 import { getLatestPosts } from "./lib/blog";
 import {
@@ -34,6 +36,12 @@ export default async function Home() {
               >
                 Projects
               </a>
+              <Link
+                href="/contact"
+                className="text-sm/6 font-semibold text-zinc-100"
+              >
+                Contact
+              </Link>
               <Link
                 href="/blog"
                 className="text-sm/6 font-semibold text-zinc-100"
@@ -83,19 +91,21 @@ export default async function Home() {
                   View projects
                 </a>
                 <Link
-                  href="/blog"
+                  href="/contact"
                   className="text-sm/6 font-semibold text-zinc-100"
                 >
-                  Read blog <span aria-hidden="true">→</span>
+                  Discuss a project <span aria-hidden="true">→</span>
                 </Link>
               </div>
             </div>
 
             <div className="lg:justify-self-end">
               <div className="overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-900/60 shadow-2xl shadow-black/20">
-                <img
+                <Image
                   alt="Hero visual placeholder"
                   src="/icon.jpeg"
+                  width={1600}
+                  height={1200}
                   className="aspect-[4/3] w-full object-cover"
                 />
               </div>
@@ -129,6 +139,8 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      <ContactCta />
 
       {featuredPost && (
         <section className="px-6 py-24 sm:py-32 lg:px-8">
@@ -233,7 +245,8 @@ export default async function Home() {
             ))}
           </div>
           <p className="mt-8 text-center text-sm/6 text-zinc-400 md:order-1 md:mt-0">
-            Portfolio, projects, and writing by Pavel Garaev.
+            Portfolio, projects, writing, and selected client work by Pavel
+            Garaev.
           </p>
         </div>
       </footer>

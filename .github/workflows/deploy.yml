@@ -3,43 +3,41 @@ name: Auto Deploy
 on:
   push:
     branches: [master]
-  workflow_dispatch: # для ручного запуска
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
-
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Validate required env
-        run: |
-          if [ -z "$NEXT_PUBLIC_SITE_URL" ]; then
-            echo "NEXT_PUBLIC_SITE_URL is not set. Add it in GitHub: Settings -> Secrets and variables -> Actions -> Variables"
-            exit 1
-          fi
-
-      - name: Build
-        run: npm run build
-
-      - name: Deploy to server
-        uses: appleboy/scp-action@v0.1.5
+      - name: Deploy and build on server
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "out/*"
-          target: "/var/www/${{ github.event.repository.name }}"
-          rm: true
-          strip_components: 1
+          script: |
+            container_name=${{ github.event.repository.name }}
+            app_dir="/opt/$container_name"
+            env_file="$app_dir/.env"
+            repo_dir="$app_dir/repo"
+            port_mapping="127.0.0.1:3000:3000"
+
+            mkdir -p "$app_dir"
+            echo "${{ vars.ENV }}" > "$env_file"
+
+            rm -rf "$repo_dir"
+            git clone --depth 1 https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git "$repo_dir"
+            cd "$repo_dir"
+
+            docker build -t "$container_name:${{ github.sha }}" .
+
+            if [ "$(docker ps -aq -f name=$container_name)" ]; then
+              docker rm -f "$container_name"
+            fi
+
+            docker run -d --name "$container_name" \
+              --restart unless-stopped \
+              --env-file "$env_file" \
+              -v "$env_file:/app/.env" \
+              -p "$port_mapping" \
+              "$container_name:${{ github.sha }}"
