@@ -93,7 +93,7 @@ export default async function Home() {
             </div>
           </div>
 
-          <figure className="min-w-0">
+          <div className="min-w-0">
             <div className="overflow-hidden rounded-2xl bg-slate-100">
               <Image
                 src="/hero-workspace.jpg"
@@ -105,18 +105,7 @@ export default async function Home() {
                 className="aspect-[4/5] w-full object-cover object-[58%_62%]"
               />
             </div>
-            <figcaption className="mt-3 text-xs/5 text-slate-500">
-              Photo by{" "}
-              <a
-                href="https://unsplash.com/photos/oYzjGQ7LCVE"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline decoration-slate-300 underline-offset-2 hover:text-slate-800"
-              >
-                Bayu Syaits
-              </a>
-            </figcaption>
-          </figure>
+          </div>
         </div>
       </section>
 
