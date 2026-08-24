@@ -1,255 +1,308 @@
 import Image from "next/image";
 import Link from "next/link";
+import CaseStudyCard from "./components/CaseStudyCard";
 import ContactCta from "./components/ContactCta";
 import ProjectCard from "./components/ProjectCard";
+import ServiceCard from "./components/ServiceCard";
+import SiteFooter from "./components/SiteFooter";
+import SiteHeader from "./components/SiteHeader";
 import { getLatestPosts } from "./lib/blog";
-import {
-  clientProjects,
-  ownMobileProjects,
-  ownWebsiteProjects,
-  socialLinks,
-} from "./lib/site";
+import { caseStudies } from "./lib/cases";
+import { services } from "./lib/services";
+import { ownMobileProjects, ownWebsiteProjects } from "./lib/site";
+
+const facts = [
+  { label: "Production engineering", value: "6+ years" },
+  { label: "Web and e-commerce products", value: "10+" },
+  { label: "Mobile platforms", value: "iOS and Android" },
+  { label: "Working languages", value: "English and Russian" },
+];
+
+const experience = [
+  {
+    title: "AI and investigation products",
+    description:
+      "Persistent search, external integrations, structured LLM output, graph exploration, exports, and operational workflows.",
+  },
+  {
+    title: "Data-heavy web platforms",
+    description:
+      "Administrative applications, complex records, validation, filters, access controls, imports, and exports.",
+  },
+  {
+    title: "Mobile and payment products",
+    description:
+      "React Native applications for iOS and Android with onboarding, forms, payments, subscriptions, and API integration.",
+  },
+];
+
+const profileSchemaJson = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Person",
+  jobTitle: "Senior full-stack engineer",
+  knowsAbout: [
+    "Full-stack development",
+    "Next.js",
+    "React Native",
+    "Node.js",
+    "PostgreSQL",
+    "AI products",
+    "Data platforms",
+  ],
+  name: "Pavel Garaev",
+  sameAs: ["https://linkedin.com/in/ipagar", "https://t.me/ipagar"],
+  url: "https://pavelgaraev.com",
+}).replace(/</g, "\\u003c");
 
 export default async function Home() {
   const latestPosts = await getLatestPosts(3);
-  const [featuredPost, ...secondaryPosts] = latestPosts;
 
   return (
-    <main className="site-shell min-h-screen bg-zinc-950 text-zinc-100">
-      <header className="absolute inset-x-0 top-0 z-50">
-        <nav
-          aria-label="Global"
-          className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-8"
-        >
-          <Link
-            href="/"
-            className="-m-1.5 p-1.5 text-sm font-semibold uppercase tracking-[0.28em] text-zinc-100"
-          >
-            Pavel Garaev
-          </Link>
+    <main className="min-h-screen bg-white text-slate-950">
+      <SiteHeader />
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: This JSON is generated from static profile data and markup characters are escaped.
+        dangerouslySetInnerHTML={{ __html: profileSchemaJson }}
+      />
 
-          <div className="hidden lg:flex lg:gap-x-10">
-            <div className="flex items-center gap-x-10">
-              <a
-                href="#projects"
-                className="text-sm/6 font-semibold text-zinc-100"
-              >
-                Projects
-              </a>
+      <section className="relative isolate overflow-hidden border-b border-slate-200 bg-white">
+        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-16 sm:py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(420px,0.75fr)] lg:items-center lg:gap-20 lg:px-8 lg:py-24">
+          <div className="max-w-2xl">
+            <h1 className="max-w-xl text-4xl/none font-semibold tracking-tight text-balance text-slate-950 sm:text-5xl sm:leading-[1.05]">
+              Senior full-stack engineer
+            </h1>
+            <p className="mt-7 max-w-xl text-lg/8 text-slate-600">
+              I build AI and data products, web applications, and React Native
+              apps. My work covers architecture, frontend, backend,
+              integrations, and production delivery.
+            </p>
+            <div className="mt-10 flex flex-wrap items-center gap-4">
               <Link
                 href="/contact"
-                className="text-sm/6 font-semibold text-zinc-100"
+                className="rounded-md bg-slate-950 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-950"
               >
-                Contact
+                Discuss a project or role
               </Link>
               <Link
-                href="/blog"
-                className="text-sm/6 font-semibold text-zinc-100"
+                href="/case-studies"
+                className="px-2 py-3 text-sm font-semibold text-slate-950 hover:text-blue-700"
               >
-                Blog
+                View case studies <span aria-hidden="true">→</span>
               </Link>
             </div>
-
-            <div className="flex items-center gap-x-4 border-l border-zinc-800/80 pl-6">
-              {socialLinks.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-zinc-400 hover:text-zinc-100"
-                >
-                  <span className="sr-only">{item.label}</span>
-                  <item.icon className="size-5" />
-                </a>
-              ))}
-            </div>
           </div>
-        </nav>
-      </header>
 
-      <section className="py-32 sm:py-40">
+          <figure className="min-w-0">
+            <div className="overflow-hidden rounded-2xl bg-slate-100">
+              <Image
+                src="/hero-workspace.jpg"
+                alt="Laptop with a software development environment open"
+                width={1600}
+                height={2398}
+                priority
+                sizes="(min-width: 1024px) 42vw, 100vw"
+                className="aspect-[4/5] w-full object-cover object-[58%_62%]"
+              />
+            </div>
+            <figcaption className="mt-3 text-xs/5 text-slate-500">
+              Photo by{" "}
+              <a
+                href="https://unsplash.com/photos/oYzjGQ7LCVE"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-slate-300 underline-offset-2 hover:text-slate-800"
+              >
+                Bayu Syaits
+              </a>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section className="border-b border-slate-200 bg-slate-50">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.9fr)] lg:items-center">
-            <div className="max-w-4xl">
-              <h1 className="mt-4 text-5xl font-semibold tracking-tight text-balance text-zinc-100 sm:text-7xl">
-                I build products and ship digital work.
-              </h1>
-              <p className="mt-6 max-w-2xl text-xl/8 text-zinc-300">
-                Own apps, selected web work, and writing about product and
-                engineering.
+          <dl className="grid grid-cols-1 divide-y divide-slate-200 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
+            {facts.map((fact) => (
+              <div key={fact.label} className="flex flex-col py-8 sm:px-6">
+                <dt className="text-sm/6 text-slate-600">{fact.label}</dt>
+                <dd className="order-first text-2xl font-semibold tracking-tight text-slate-950">
+                  {fact.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      <section id="services" className="bg-white py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <h2 className="text-4xl font-semibold tracking-tight text-balance text-slate-950 sm:text-5xl">
+              What I work on
+            </h2>
+            <p className="mt-6 text-lg/8 text-slate-600">
+              I take on complete product areas or focused engineering work in an
+              existing system.
+            </p>
+          </div>
+          <div className="mt-16 grid gap-x-8 gap-y-12 lg:grid-cols-3">
+            {services.map((service) => (
+              <ServiceCard key={service.slug} service={service} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="case-studies" className="bg-slate-50 py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-3xl">
+              <h2 className="text-4xl font-semibold tracking-tight text-balance text-slate-950 sm:text-5xl">
+                Selected case studies
+              </h2>
+              <p className="mt-6 text-lg/8 text-slate-600">
+                Examples of the systems, workflows, and product areas I have
+                worked on.
               </p>
-              <p className="mt-6 max-w-2xl text-base/7 text-zinc-400">
-                I use this site to collect what I build for myself, what I ship
-                for clients, and the notes worth keeping after the work is done.
+            </div>
+            <Link
+              href="/case-studies"
+              className="shrink-0 text-sm font-semibold text-blue-700 hover:text-blue-900"
+            >
+              View all cases <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+          <div className="mt-12 grid gap-6 lg:grid-cols-3">
+            {caseStudies.map((caseStudy) => (
+              <CaseStudyCard key={caseStudy.slug} caseStudy={caseStudy} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-20">
+            <div className="max-w-xl">
+              <h2 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+                Experience
+              </h2>
+              <p className="mt-6 text-lg/8 text-slate-600">
+                My work covers product development, system design, production
+                engineering, and ongoing improvement after release.
               </p>
-              <div className="mt-10 flex items-center gap-x-6">
-                <a
-                  href="#projects"
-                  className="rounded-md bg-zinc-100 px-3.5 py-2.5 text-sm font-semibold text-zinc-950 shadow-xs hover:bg-zinc-200"
-                >
-                  View projects
-                </a>
+              <div className="mt-8 flex flex-wrap gap-5">
                 <Link
                   href="/contact"
-                  className="text-sm/6 font-semibold text-zinc-100"
+                  className="text-sm font-semibold text-blue-700 hover:text-blue-900"
                 >
-                  Discuss a project <span aria-hidden="true">→</span>
+                  Discuss a role <span aria-hidden="true">→</span>
                 </Link>
+                <a
+                  href="https://linkedin.com/in/ipagar"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-semibold text-slate-700 hover:text-slate-950"
+                >
+                  LinkedIn <span aria-hidden="true">→</span>
+                </a>
               </div>
             </div>
-
-            <div className="lg:justify-self-end">
-              <div className="overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-900/60 shadow-2xl shadow-black/20">
-                <Image
-                  alt="Hero visual placeholder"
-                  src="/icon.jpeg"
-                  width={1600}
-                  height={1200}
-                  className="aspect-[4/3] w-full object-cover"
-                />
-              </div>
+            <div className="grid gap-8">
+              {experience.map((item) => (
+                <article
+                  key={item.title}
+                  className="border-t border-slate-300 pt-6"
+                >
+                  <h3 className="text-lg font-semibold text-slate-950">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-base/7 text-slate-600">
+                    {item.description}
+                  </p>
+                </article>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      <section id="projects" className="px-6 py-24 sm:py-32 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      <section
+        id="products"
+        className="border-y border-slate-200 bg-slate-50 py-24 sm:py-32"
+      >
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="max-w-3xl">
-            <h2 className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-zinc-100 sm:text-5xl">
-              Selected apps, websites, and public work.
+            <h2 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+              Products I maintain
             </h2>
-            <p className="mt-6 text-lg/8 text-zinc-400">
-              A focused selection of products I continue to shape and projects I
-              have shipped in public.
+            <p className="mt-6 text-lg/8 text-slate-600">
+              Public products I have shipped and continue to work on.
             </p>
           </div>
-
-          <div className="mt-12 grid gap-6 lg:grid-cols-2">
+          <div className="mt-12 grid gap-6 lg:grid-cols-3">
             {ownMobileProjects.map((url) => (
               <ProjectCard key={url} url={url} />
             ))}
             {ownWebsiteProjects.map((url) => (
               <ProjectCard key={url} url={url} />
             ))}
-            {clientProjects.map((url) => (
-              <ProjectCard key={url} url={url} />
-            ))}
           </div>
         </div>
       </section>
 
-      <ContactCta />
-
-      {featuredPost && (
-        <section className="px-6 py-24 sm:py-32 lg:px-8">
-          <div className="mx-auto grid max-w-7xl grid-cols-1 gap-x-8 gap-y-12 sm:gap-y-16 lg:grid-cols-2">
-            <article className="mx-auto w-full max-w-2xl lg:mx-0 lg:max-w-lg">
-              <time
-                dateTime={featuredPost.publishedAt}
-                className="block text-sm/6 text-zinc-400"
-              >
-                {new Intl.DateTimeFormat("en", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                }).format(new Date(featuredPost.publishedAt))}
-              </time>
-              <h2
-                id="featured-post"
-                className="mt-4 text-3xl font-semibold tracking-tight text-pretty text-zinc-100 sm:text-4xl"
-              >
-                {featuredPost.title}
+      {latestPosts.length > 0 ? (
+        <section className="bg-white py-24 sm:py-32">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="mx-auto max-w-3xl lg:mx-0">
+              <h2 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+                Recent writing
               </h2>
-              <p className="mt-4 text-lg/8 text-zinc-400">
-                {featuredPost.excerpt}
+              <p className="mt-4 text-lg/8 text-slate-600">
+                Notes on product work, engineering, and decisions made during
+                delivery.
               </p>
-              <div className="mt-6 flex flex-col gap-6 sm:mt-8 lg:mt-6">
-                <div className="flex">
-                  <Link
-                    href={`/blog/${featuredPost.slug}`}
-                    aria-describedby="featured-post"
-                    className="text-sm/6 font-semibold text-zinc-100 hover:text-zinc-300"
+            </div>
+            <div className="mt-12 grid gap-10 border-t border-slate-200 pt-10 lg:grid-cols-3">
+              {latestPosts.map((post) => (
+                <article key={post.slug} className="flex flex-col">
+                  <time
+                    dateTime={post.publishedAt}
+                    className="text-sm/6 text-slate-500"
                   >
-                    Continue reading <span aria-hidden="true">&rarr;</span>
-                  </Link>
-                </div>
-                <div className="flex border-t border-zinc-800/80 pt-6">
+                    {new Intl.DateTimeFormat("en", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    }).format(new Date(post.publishedAt))}
+                  </time>
+                  <h3 className="mt-3 text-xl font-semibold tracking-tight text-slate-950">
+                    <Link
+                      href={`/blog/${post.slug}`}
+                      className="hover:text-blue-700"
+                    >
+                      {post.title}
+                    </Link>
+                  </h3>
+                  <p className="mt-4 flex-auto text-sm/6 text-slate-600">
+                    {post.excerpt}
+                  </p>
                   <Link
-                    href="/blog"
-                    className="text-sm/6 font-medium text-zinc-400 transition hover:text-zinc-100"
+                    href={`/blog/${post.slug}`}
+                    className="mt-6 text-sm font-semibold text-blue-700 hover:text-blue-900"
                   >
-                    Read all posts
+                    Read article <span aria-hidden="true">→</span>
                   </Link>
-                </div>
-              </div>
-            </article>
-            <div className="mx-auto w-full max-w-2xl border-t border-zinc-800/80 pt-12 sm:pt-16 lg:mx-0 lg:max-w-none lg:border-t-0 lg:pt-0">
-              <div className="-my-12 divide-y divide-zinc-800/80">
-                {secondaryPosts.map((post) => (
-                  <article key={post.slug} className="py-12">
-                    <div className="group relative max-w-xl">
-                      <time
-                        dateTime={post.publishedAt}
-                        className="block text-sm/6 text-zinc-400"
-                      >
-                        {new Intl.DateTimeFormat("en", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        }).format(new Date(post.publishedAt))}
-                      </time>
-                      <h3 className="mt-2 text-lg font-semibold text-zinc-100 group-hover:text-zinc-300">
-                        <Link href={`/blog/${post.slug}`}>
-                          <span className="absolute inset-0" />
-                          {post.title}
-                        </Link>
-                      </h3>
-                      <p className="mt-4 text-sm/6 text-zinc-400">
-                        {post.excerpt}
-                      </p>
-                    </div>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {post.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded-full border border-zinc-800/80 px-3 py-1 text-xs text-zinc-400"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </article>
-                ))}
-              </div>
+                </article>
+              ))}
             </div>
           </div>
         </section>
-      )}
+      ) : null}
 
-      <footer className="border-t border-zinc-800/80">
-        <div className="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-between lg:px-8">
-          <div className="flex justify-center gap-x-6 md:order-2">
-            {socialLinks.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-zinc-400 hover:text-zinc-100"
-              >
-                <span className="sr-only">{item.label}</span>
-                <item.icon className="size-5" />
-              </a>
-            ))}
-          </div>
-          <p className="mt-8 text-center text-sm/6 text-zinc-400 md:order-1 md:mt-0">
-            Portfolio, projects, writing, and selected client work by Pavel
-            Garaev.
-          </p>
-        </div>
-      </footer>
+      <ContactCta />
+      <SiteFooter />
     </main>
   );
 }

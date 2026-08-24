@@ -6,13 +6,19 @@ import { submitProjectInquiry } from "../contact/actions";
 import {
   budgetRanges,
   contactConfig,
+  type InquiryType,
   initialProjectInquiryActionState,
   initialProjectInquiryValues,
+  inquiryTypes,
   type ProjectInquiryValues,
   preferredLanguages,
-  projectStages,
+  projectContexts,
   projectTimelines,
+  roleContexts,
 } from "../lib/contact";
+
+const inputClassName =
+  "mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:border-blue-600 focus:ring-1 focus:ring-blue-600";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -21,9 +27,9 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="rounded-md bg-zinc-100 px-4 py-2.5 text-sm font-semibold text-zinc-950 hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-60"
+      className="rounded-md bg-slate-950 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {pending ? "Sending..." : "Send inquiry"}
+      {pending ? "Sending..." : "Send details"}
     </button>
   );
 }
@@ -39,10 +45,27 @@ export default function ProjectInquiryForm() {
     initialProjectInquiryValues,
   );
   const formId = useId();
+  const workContexts =
+    form.inquiryType === "project" ? projectContexts : roleContexts;
 
   useEffect(() => {
     setForm(formValues);
   }, [formValues]);
+
+  useEffect(() => {
+    if (actionState.status !== "success" || !actionState.submittedInquiryType) {
+      return;
+    }
+
+    const trackingWindow = window as typeof window & {
+      dataLayer: Array<Record<string, string>>;
+    };
+    trackingWindow.dataLayer = trackingWindow.dataLayer ?? [];
+    trackingWindow.dataLayer.push({
+      event: "lead_form_submit",
+      inquiry_type: actionState.submittedInquiryType,
+    });
+  }, [actionState.status, actionState.submittedInquiryType]);
 
   function updateField<Key extends keyof ProjectInquiryValues>(
     key: Key,
@@ -54,34 +77,72 @@ export default function ProjectInquiryForm() {
     }));
   }
 
+  function updateInquiryType(inquiryType: InquiryType) {
+    setForm((current) => ({
+      ...current,
+      inquiryType,
+      workContext:
+        inquiryType === "project" ? projectContexts[0] : roleContexts[0],
+    }));
+  }
+
   return (
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.7fr)] lg:items-start">
+    <div className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.55fr)] lg:items-start">
       <form
         action={formAction}
-        className="rounded-[2rem] border border-zinc-800/80 bg-zinc-900/40 p-6 sm:p-8"
+        className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
       >
-        <div className="border-b border-zinc-800/80 pb-10">
-          <h2 className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
-            Project brief
+        <div className="border-b border-slate-200 pb-8">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+            Work details
           </h2>
-          <p className="mt-3 max-w-2xl text-sm/6 text-zinc-400">
-            Enough context to understand the task, timeline, and budget.
+          <p className="mt-3 max-w-2xl text-sm/6 text-slate-600">
+            Share enough context for me to understand the work and reply with a
+            relevant next step.
           </p>
         </div>
 
-        <div className="mt-10 space-y-10">
+        <div className="mt-8 space-y-8">
           <fieldset>
-            <legend className="text-sm/6 font-semibold text-zinc-100">
+            <legend className="text-sm/6 font-semibold text-slate-950">
+              What are you contacting me about
+            </legend>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {inquiryTypes.map((option) => (
+                <label
+                  key={option.value}
+                  className="relative block rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 has-checked:border-blue-600 has-checked:bg-blue-50 has-checked:ring-1 has-checked:ring-blue-600"
+                >
+                  <input
+                    checked={form.inquiryType === option.value}
+                    name="inquiryType"
+                    type="radio"
+                    value={option.value}
+                    onChange={() => updateInquiryType(option.value)}
+                    className="absolute inset-0 appearance-none focus:outline-none"
+                  />
+                  <span className="flex flex-col">
+                    <span className="text-sm font-semibold text-slate-950">
+                      {option.label}
+                    </span>
+                    <span className="mt-1 text-sm/6 text-slate-600">
+                      {option.description}
+                    </span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend className="text-sm/6 font-semibold text-slate-950">
               Preferred language
             </legend>
-            <p className="mt-1 text-sm/6 text-zinc-500">
-              Pick the language you want to use for the conversation.
-            </p>
-            <div className="mt-5 space-y-3">
+            <div className="mt-4 flex flex-wrap gap-3">
               {preferredLanguages.map((option) => (
                 <label
                   key={option.value}
-                  className="group relative block rounded-2xl border border-zinc-800/80 bg-zinc-950/60 px-5 py-4 has-checked:border-zinc-400 has-checked:bg-zinc-900 has-checked:outline has-checked:outline-1 has-checked:outline-zinc-400"
+                  className="relative rounded-lg border border-slate-300 bg-white px-4 py-2.5 has-checked:border-blue-600 has-checked:bg-blue-50 has-checked:ring-1 has-checked:ring-blue-600"
                 >
                   <input
                     checked={form.preferredLanguage === option.value}
@@ -93,24 +154,19 @@ export default function ProjectInquiryForm() {
                     }
                     className="absolute inset-0 appearance-none focus:outline-none"
                   />
-                  <span className="flex flex-col">
-                    <span className="text-sm font-medium text-zinc-100">
-                      {option.label}
-                    </span>
-                    <span className="mt-1 text-sm/6 text-zinc-500">
-                      {option.description}
-                    </span>
+                  <span className="text-sm font-medium text-slate-800">
+                    {option.label}
                   </span>
                 </label>
               ))}
             </div>
           </fieldset>
 
-          <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-7 sm:grid-cols-2">
             <div>
               <label
                 htmlFor={`${formId}-name`}
-                className="block text-sm/6 font-medium text-zinc-100"
+                className="block text-sm/6 font-medium text-slate-950"
               >
                 Name
               </label>
@@ -120,7 +176,7 @@ export default function ProjectInquiryForm() {
                 type="text"
                 value={form.name}
                 onChange={(event) => updateField("name", event.target.value)}
-                className="mt-2 block w-full rounded-xl border border-zinc-800 bg-zinc-950/70 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-zinc-500"
+                className={inputClassName}
                 placeholder="Your name"
                 required
               />
@@ -129,7 +185,7 @@ export default function ProjectInquiryForm() {
             <div>
               <label
                 htmlFor={`${formId}-contact`}
-                className="block text-sm/6 font-medium text-zinc-100"
+                className="block text-sm/6 font-medium text-slate-950"
               >
                 Email or Telegram
               </label>
@@ -139,7 +195,7 @@ export default function ProjectInquiryForm() {
                 type="text"
                 value={form.contact}
                 onChange={(event) => updateField("contact", event.target.value)}
-                className="mt-2 block w-full rounded-xl border border-zinc-800 bg-zinc-950/70 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-zinc-500"
+                className={inputClassName}
                 placeholder="name@example.com or @username"
                 required
               />
@@ -147,23 +203,23 @@ export default function ProjectInquiryForm() {
 
             <div>
               <label
-                htmlFor={`${formId}-stage`}
-                className="block text-sm/6 font-medium text-zinc-100"
+                htmlFor={`${formId}-context`}
+                className="block text-sm/6 font-medium text-slate-950"
               >
-                Project stage
+                {form.inquiryType === "project" ? "Project stage" : "Role type"}
               </label>
               <select
-                id={`${formId}-stage`}
-                name="projectStage"
-                value={form.projectStage}
+                id={`${formId}-context`}
+                name="workContext"
+                value={form.workContext}
                 onChange={(event) =>
-                  updateField("projectStage", event.target.value)
+                  updateField("workContext", event.target.value)
                 }
-                className="mt-2 block w-full rounded-xl border border-zinc-800 bg-zinc-950/70 px-3.5 py-2.5 text-sm text-zinc-100 outline-none focus:border-zinc-500"
+                className={inputClassName}
               >
-                {projectStages.map((stage) => (
-                  <option key={stage} value={stage}>
-                    {stage}
+                {workContexts.map((context) => (
+                  <option key={context} value={context}>
+                    {context}
                   </option>
                 ))}
               </select>
@@ -172,7 +228,7 @@ export default function ProjectInquiryForm() {
             <div>
               <label
                 htmlFor={`${formId}-timeline`}
-                className="block text-sm/6 font-medium text-zinc-100"
+                className="block text-sm/6 font-medium text-slate-950"
               >
                 Timeline
               </label>
@@ -183,7 +239,7 @@ export default function ProjectInquiryForm() {
                 onChange={(event) =>
                   updateField("timeline", event.target.value)
                 }
-                className="mt-2 block w-full rounded-xl border border-zinc-800 bg-zinc-950/70 px-3.5 py-2.5 text-sm text-zinc-100 outline-none focus:border-zinc-500"
+                className={inputClassName}
               >
                 {projectTimelines.map((timeline) => (
                   <option key={timeline} value={timeline}>
@@ -193,34 +249,38 @@ export default function ProjectInquiryForm() {
               </select>
             </div>
 
-            <div className="sm:col-span-2">
-              <label
-                htmlFor={`${formId}-budget`}
-                className="block text-sm/6 font-medium text-zinc-100"
-              >
-                Budget range
-              </label>
-              <select
-                id={`${formId}-budget`}
-                name="budgetRange"
-                value={form.budgetRange}
-                onChange={(event) =>
-                  updateField("budgetRange", event.target.value)
-                }
-                className="mt-2 block w-full rounded-xl border border-zinc-800 bg-zinc-950/70 px-3.5 py-2.5 text-sm text-zinc-100 outline-none focus:border-zinc-500"
-              >
-                {budgetRanges.map((budgetRange) => (
-                  <option key={budgetRange} value={budgetRange}>
-                    {budgetRange}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {form.inquiryType === "project" ? (
+              <div className="sm:col-span-2">
+                <label
+                  htmlFor={`${formId}-budget`}
+                  className="block text-sm/6 font-medium text-slate-950"
+                >
+                  Budget range
+                </label>
+                <select
+                  id={`${formId}-budget`}
+                  name="budgetRange"
+                  value={form.budgetRange}
+                  onChange={(event) =>
+                    updateField("budgetRange", event.target.value)
+                  }
+                  className={inputClassName}
+                >
+                  {budgetRanges.map((budgetRange) => (
+                    <option key={budgetRange} value={budgetRange}>
+                      {budgetRange}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <input type="hidden" name="budgetRange" value="" />
+            )}
 
             <div className="sm:col-span-2">
               <label
                 htmlFor={`${formId}-links`}
-                className="block text-sm/6 font-medium text-zinc-100"
+                className="block text-sm/6 font-medium text-slate-950"
               >
                 Links
               </label>
@@ -230,17 +290,17 @@ export default function ProjectInquiryForm() {
                 type="text"
                 value={form.links}
                 onChange={(event) => updateField("links", event.target.value)}
-                className="mt-2 block w-full rounded-xl border border-zinc-800 bg-zinc-950/70 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-zinc-500"
-                placeholder="Site, Figma, repo, Notion, brief"
+                className={inputClassName}
+                placeholder="Company, product, job description, brief, or repository"
               />
             </div>
 
             <div className="sm:col-span-2">
               <label
                 htmlFor={`${formId}-message`}
-                className="block text-sm/6 font-medium text-zinc-100"
+                className="block text-sm/6 font-medium text-slate-950"
               >
-                What do you need help with?
+                Details
               </label>
               <textarea
                 id={`${formId}-message`}
@@ -248,17 +308,17 @@ export default function ProjectInquiryForm() {
                 rows={6}
                 value={form.message}
                 onChange={(event) => updateField("message", event.target.value)}
-                className="mt-2 block w-full rounded-2xl border border-zinc-800 bg-zinc-950/70 px-3.5 py-3 text-sm/6 text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-zinc-500"
-                placeholder="A short outline of the project, current problem, and expected outcome."
+                className={inputClassName}
+                placeholder="Describe the product or role, the current situation, and what you need from me."
                 required
               />
             </div>
           </div>
         </div>
 
-        <div className="mt-10 flex flex-wrap items-center gap-4 border-t border-zinc-800/80 pt-8">
+        <div className="mt-8 flex flex-wrap items-center gap-4 border-t border-slate-200 pt-8">
           <SubmitButton />
-          <p className="text-sm/6 text-zinc-500">
+          <p className="text-sm/6 text-slate-500">
             {contactConfig.responseTime}
           </p>
         </div>
@@ -267,8 +327,8 @@ export default function ProjectInquiryForm() {
           <p
             className={`mt-6 text-sm/6 ${
               actionState.status === "success"
-                ? "text-emerald-400"
-                : "text-rose-400"
+                ? "text-emerald-700"
+                : "text-rose-700"
             }`}
           >
             {actionState.message}
@@ -276,42 +336,39 @@ export default function ProjectInquiryForm() {
         ) : null}
       </form>
 
-      <aside className="space-y-6">
-        <div className="rounded-[2rem] border border-zinc-800/80 bg-zinc-900/40 p-6 sm:p-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.28em] text-zinc-400">
-            Contact
-          </p>
-          <h3 className="mt-4 text-2xl font-semibold tracking-tight text-zinc-100">
-            Direct message also works
-          </h3>
-          <p className="mt-4 text-sm/6 text-zinc-400">
-            If you prefer not to use the form, send a message in Telegram or by
-            email.
-          </p>
-          <div className="mt-6 space-y-3 text-sm/6 text-zinc-400">
-            <p>
-              Telegram:{" "}
+      <aside className="rounded-2xl border border-slate-200 bg-slate-50 p-6 sm:p-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Direct contact
+        </h2>
+        <p className="mt-4 text-sm/6 text-slate-600">
+          You can also send the same details through Telegram or email.
+        </p>
+        <dl className="mt-6 space-y-5 border-t border-slate-200 pt-6">
+          <div>
+            <dt className="text-sm text-slate-500">Telegram</dt>
+            <dd className="mt-1">
               <a
                 href={contactConfig.telegramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-medium text-zinc-100 hover:text-zinc-300"
+                className="font-semibold text-slate-950 hover:text-blue-700"
               >
                 {contactConfig.telegramHandle}
               </a>
-            </p>
-            <p>
-              Email:{" "}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-slate-500">Email</dt>
+            <dd className="mt-1">
               <a
                 href={`mailto:${contactConfig.email}`}
-                className="font-medium text-zinc-100 hover:text-zinc-300"
+                className="font-semibold text-slate-950 hover:text-blue-700"
               >
                 {contactConfig.email}
               </a>
-            </p>
-            <p>{contactConfig.responseTime}</p>
+            </dd>
           </div>
-        </div>
+        </dl>
       </aside>
     </div>
   );

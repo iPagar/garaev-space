@@ -6,21 +6,24 @@ export const contactConfig = {
 } as const;
 
 export type PreferredLanguage = "english" | "russian";
+export type InquiryType = "project" | "role";
 
 export type ProjectInquiryValues = {
   budgetRange: string;
   contact: string;
+  inquiryType: InquiryType;
   links: string;
   message: string;
   name: string;
   preferredLanguage: PreferredLanguage;
-  projectStage: string;
   timeline: string;
+  workContext: string;
 };
 
 export type ProjectInquiryActionState = {
   message: string;
   status: "idle" | "success" | "error";
+  submittedInquiryType: InquiryType | null;
   values: ProjectInquiryValues;
 };
 
@@ -42,12 +45,33 @@ export const preferredLanguages = [
   },
 ] as const;
 
-export const projectStages = [
+export const inquiryTypes = [
+  {
+    value: "project",
+    label: "Project",
+    description:
+      "A new product, an existing system, or focused engineering work.",
+  },
+  {
+    value: "role",
+    label: "Role",
+    description: "A full-time, contract, or part-time engineering role.",
+  },
+] as const;
+
+export const projectContexts = [
   "Idea",
   "Designs ready",
   "Existing product",
   "Need audit or consultation",
   "Need end-to-end build",
+] as const;
+
+export const roleContexts = [
+  "Full-time role",
+  "Contract role",
+  "Part-time role",
+  "Advisory work",
 ] as const;
 
 export const projectTimelines = [
@@ -67,17 +91,19 @@ export const budgetRanges = [
 export const initialProjectInquiryValues: ProjectInquiryValues = {
   budgetRange: budgetRanges[0],
   contact: "",
+  inquiryType: inquiryTypes[0].value,
   links: "",
   message: "",
   name: "",
   preferredLanguage: preferredLanguages[0].value,
-  projectStage: projectStages[0],
   timeline: projectTimelines[1],
+  workContext: projectContexts[0],
 };
 
 export const initialProjectInquiryActionState: ProjectInquiryActionState = {
   message: "",
   status: "idle",
+  submittedInquiryType: null,
   values: initialProjectInquiryValues,
 };
 
@@ -88,19 +114,28 @@ export function getLanguageLabel(language: PreferredLanguage) {
   );
 }
 
+export function getInquiryTypeLabel(inquiryType: InquiryType) {
+  return (
+    inquiryTypes.find((option) => option.value === inquiryType)?.label ??
+    inquiryType
+  );
+}
+
 export function buildProjectInquirySummary(values: ProjectInquiryValues) {
+  const isProject = values.inquiryType === "project";
+
   return [
-    "Project inquiry",
+    `${getInquiryTypeLabel(values.inquiryType)} inquiry`,
     "",
     `Preferred language: ${getLanguageLabel(values.preferredLanguage)}`,
     `Name: ${values.name.trim() || "-"}`,
     `Contact: ${values.contact.trim() || "-"}`,
-    `Project stage: ${values.projectStage}`,
+    `${isProject ? "Project stage" : "Role type"}: ${values.workContext}`,
     `Timeline: ${values.timeline}`,
-    `Budget range: ${values.budgetRange}`,
+    ...(isProject ? [`Budget range: ${values.budgetRange}`] : []),
     `Links: ${values.links.trim() || "-"}`,
     "",
-    "Brief:",
+    "Details",
     values.message.trim() || "-",
   ].join("\n");
 }
@@ -119,5 +154,5 @@ export function getProjectInquiryFeedbackMessage(
     return errorMessages[key];
   }
 
-  return "Your inquiry has been sent. I will get back to you by email or Telegram.";
+  return "Your message has been sent. I will get back to you by email or Telegram.";
 }

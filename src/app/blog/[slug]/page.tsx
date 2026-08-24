@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import ContactCta from "../../components/ContactCta";
+import SiteFooter from "../../components/SiteFooter";
+import SiteHeader from "../../components/SiteHeader";
 import { getAllPosts, getPostBySlug, parseMarkdown } from "../../lib/blog";
 
 interface BlogPostPageProps {
@@ -24,14 +27,19 @@ export async function generateMetadata({
   const post = await getPostBySlug(slug);
 
   if (!post) {
-    return {
-      title: "Post Not Found | Pavel Garaev",
-    };
+    return { title: "Post not found" };
   }
 
   return {
-    title: `${post.title} | Pavel Garaev`,
+    title: post.title,
     description: post.excerpt,
+    alternates: { canonical: `/blog/${post.slug}` },
+    openGraph: {
+      description: post.excerpt,
+      title: post.title,
+      type: "article",
+      url: `/blog/${post.slug}`,
+    },
   };
 }
 
@@ -46,19 +54,18 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const blocks = parseMarkdown(post.body);
 
   return (
-    <main className="site-shell min-h-screen px-6 py-8 sm:px-8 lg:px-12">
-      <section className="mx-auto max-w-5xl">
-        <Link
-          href="/blog"
-          className="inline-flex items-center gap-2 rounded-full border border-zinc-700/60 px-4 py-2 text-sm text-zinc-400 hover:border-zinc-500 hover:text-zinc-100"
-        >
-          <span aria-hidden="true">←</span>
-          All posts
-        </Link>
-
-        <article className="mt-6 rounded-[2rem] border border-zinc-800/80 bg-zinc-900/40 px-6 py-10 sm:px-10 sm:py-14">
-          <header className="border-b border-zinc-800/80 pb-8">
-            <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-zinc-400">
+    <main className="min-h-screen bg-white text-slate-950">
+      <SiteHeader />
+      <article>
+        <header className="border-b border-slate-200 bg-white py-16 sm:py-24">
+          <div className="mx-auto max-w-4xl px-6 lg:px-8">
+            <Link
+              href="/blog"
+              className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+            >
+              ← All writing
+            </Link>
+            <div className="mt-10 flex flex-wrap items-center gap-3 text-sm text-slate-500">
               <time dateTime={post.publishedAt}>
                 {new Intl.DateTimeFormat("en", {
                   day: "numeric",
@@ -68,109 +75,109 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </time>
               <span>{post.readingTime}</span>
             </div>
-
-            <h1 className="mt-6 text-5xl font-semibold tracking-tight text-zinc-100 sm:text-6xl">
+            <h1 className="mt-6 text-5xl font-semibold tracking-tight text-balance text-slate-950 sm:text-6xl">
               {post.title}
             </h1>
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-zinc-400">
+            <p className="mt-6 max-w-3xl text-lg/8 text-slate-600">
               {post.excerpt}
             </p>
-
             <div className="mt-8 flex flex-wrap gap-2">
               {post.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full border border-zinc-800/80 bg-zinc-950 px-3 py-1 text-xs text-zinc-400"
+                  className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600"
                 >
                   {tag}
                 </span>
               ))}
             </div>
-          </header>
+          </div>
+        </header>
 
-          <div className="mt-10 grid gap-6">
-            {blocks.map((block, index) => {
-              const key = `${block.type}-${index}`;
+        <div className="mx-auto grid max-w-4xl gap-6 px-6 py-16 lg:px-8 lg:py-20">
+          {blocks.map((block, index) => {
+            const key = `${block.type}-${index}`;
 
-              if (block.type === "heading") {
-                if (block.level === 2) {
-                  return (
-                    <h2
-                      key={key}
-                      className="pt-4 text-3xl font-semibold tracking-tight text-zinc-100"
-                    >
-                      {block.content}
-                    </h2>
-                  );
-                }
-
+            if (block.type === "heading") {
+              if (block.level === 2) {
                 return (
-                  <h3
+                  <h2
                     key={key}
-                    className="pt-2 text-2xl font-semibold tracking-tight text-zinc-100"
+                    className="pt-6 text-3xl font-semibold tracking-tight text-slate-950"
                   >
                     {block.content}
-                  </h3>
-                );
-              }
-
-              if (block.type === "paragraph") {
-                return (
-                  <p key={key} className="text-lg leading-9 text-zinc-200/90">
-                    {block.content}
-                  </p>
-                );
-              }
-
-              if (block.type === "unordered-list") {
-                return (
-                  <ul
-                    key={key}
-                    className="grid list-disc gap-3 pl-6 text-lg leading-9 text-zinc-200/90 marker:text-zinc-500"
-                  >
-                    {block.items.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                );
-              }
-
-              if (block.type === "ordered-list") {
-                return (
-                  <ol
-                    key={key}
-                    className="grid list-decimal gap-3 pl-6 text-lg leading-9 text-zinc-200/90 marker:text-zinc-500"
-                  >
-                    {block.items.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ol>
-                );
-              }
-
-              if (block.type === "blockquote") {
-                return (
-                  <blockquote
-                    key={key}
-                    className="rounded-r-[1.5rem] border-l-2 border-zinc-700 px-6 py-5 text-lg italic leading-9 text-zinc-300"
-                  >
-                    {block.content}
-                  </blockquote>
+                  </h2>
                 );
               }
 
               return (
-                <pre
+                <h3
                   key={key}
-                  className="overflow-x-auto rounded-[1.5rem] border border-zinc-800/80 bg-zinc-950 p-5 text-sm leading-7 text-zinc-100"
+                  className="pt-3 text-2xl font-semibold tracking-tight text-slate-950"
                 >
-                  <code>{block.content}</code>
-                </pre>
+                  {block.content}
+                </h3>
               );
-            })}
-          </div>
-        </article>
-      </section>
+            }
+
+            if (block.type === "paragraph") {
+              return (
+                <p key={key} className="text-lg/9 text-slate-700">
+                  {block.content}
+                </p>
+              );
+            }
+
+            if (block.type === "unordered-list") {
+              return (
+                <ul
+                  key={key}
+                  className="grid list-disc gap-3 pl-6 text-lg/9 text-slate-700 marker:text-slate-400"
+                >
+                  {block.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              );
+            }
+
+            if (block.type === "ordered-list") {
+              return (
+                <ol
+                  key={key}
+                  className="grid list-decimal gap-3 pl-6 text-lg/9 text-slate-700 marker:text-slate-400"
+                >
+                  {block.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ol>
+              );
+            }
+
+            if (block.type === "blockquote") {
+              return (
+                <blockquote
+                  key={key}
+                  className="border-l-2 border-slate-300 px-6 py-3 text-lg/9 italic text-slate-600"
+                >
+                  {block.content}
+                </blockquote>
+              );
+            }
+
+            return (
+              <pre
+                key={key}
+                className="overflow-x-auto rounded-xl bg-slate-950 p-5 text-sm/7 text-slate-100"
+              >
+                <code>{block.content}</code>
+              </pre>
+            );
+          })}
+        </div>
+      </article>
+      <ContactCta />
+      <SiteFooter />
     </main>
   );
 }

@@ -5,14 +5,18 @@ import {
   budgetRanges,
   buildProjectInquirySummary,
   contactConfig,
+  getInquiryTypeLabel,
   getProjectInquiryFeedbackMessage,
+  type InquiryType,
   initialProjectInquiryValues,
+  inquiryTypes,
   type PreferredLanguage,
   type ProjectInquiryActionState,
   type ProjectInquiryValues,
   preferredLanguages,
-  projectStages,
+  projectContexts,
   projectTimelines,
+  roleContexts,
 } from "../lib/contact";
 
 function normalizeValue(value: FormDataEntryValue | null) {
@@ -23,6 +27,10 @@ function isPreferredLanguage(value: string): value is PreferredLanguage {
   return preferredLanguages.some((option) => option.value === value);
 }
 
+function isInquiryType(value: string): value is InquiryType {
+  return inquiryTypes.some((option) => option.value === value);
+}
+
 function isAllowedChoice(value: string, allowedValues: readonly string[]) {
   return allowedValues.includes(value);
 }
@@ -31,23 +39,27 @@ function extractValues(formData: FormData): ProjectInquiryValues {
   const preferredLanguageValue = normalizeValue(
     formData.get("preferredLanguage"),
   );
+  const inquiryTypeValue = normalizeValue(formData.get("inquiryType"));
 
   return {
     budgetRange: normalizeValue(formData.get("budgetRange")),
     contact: normalizeValue(formData.get("contact")),
+    inquiryType: isInquiryType(inquiryTypeValue)
+      ? inquiryTypeValue
+      : initialProjectInquiryValues.inquiryType,
     links: normalizeValue(formData.get("links")),
     message: normalizeValue(formData.get("message")),
     name: normalizeValue(formData.get("name")),
     preferredLanguage: isPreferredLanguage(preferredLanguageValue)
       ? preferredLanguageValue
       : initialProjectInquiryValues.preferredLanguage,
-    projectStage: normalizeValue(formData.get("projectStage")),
     timeline: normalizeValue(formData.get("timeline")),
+    workContext: normalizeValue(formData.get("workContext")),
   };
 }
 
 function getReplyTo(contact: string) {
-  return contact.includes("@") ? contact : undefined;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) ? contact : undefined;
 }
 
 function escapeHtml(value: string) {
@@ -60,13 +72,15 @@ function escapeHtml(value: string) {
 }
 
 function formatEmailHtml(values: ProjectInquiryValues) {
+  const isProject = values.inquiryType === "project";
   const rows = [
+    ["Inquiry type", getInquiryTypeLabel(values.inquiryType)],
     ["Preferred language", values.preferredLanguage],
     ["Name", values.name],
     ["Contact", values.contact],
-    ["Project stage", values.projectStage],
+    [isProject ? "Project stage" : "Role type", values.workContext],
     ["Timeline", values.timeline],
-    ["Budget range", values.budgetRange],
+    ...(isProject ? [["Budget range", values.budgetRange]] : []),
     ["Links", values.links || "-"],
   ];
 
@@ -79,7 +93,7 @@ function formatEmailHtml(values: ProjectInquiryValues) {
 
   return `
     <div style="font-family:Arial,sans-serif;color:#18181b;line-height:1.6;">
-      <h1 style="font-size:20px;margin-bottom:16px;">New project inquiry</h1>
+      <h1 style="font-size:20px;margin-bottom:16px;">New ${escapeHtml(values.inquiryType)} inquiry</h1>
       <table style="border-collapse:collapse;margin-bottom:24px;">
         ${detailsHtml}
       </table>
@@ -119,18 +133,22 @@ export async function submitProjectInquiry(
   formData: FormData,
 ): Promise<ProjectInquiryActionState> {
   const values = extractValues(formData);
+  const allowedContexts =
+    values.inquiryType === "project" ? projectContexts : roleContexts;
 
   if (
     !values.name ||
     !values.contact ||
     !values.message ||
-    !isAllowedChoice(values.projectStage, projectStages) ||
+    !isAllowedChoice(values.workContext, allowedContexts) ||
     !isAllowedChoice(values.timeline, projectTimelines) ||
-    !isAllowedChoice(values.budgetRange, budgetRanges)
+    (values.inquiryType === "project" &&
+      !isAllowedChoice(values.budgetRange, budgetRanges))
   ) {
     return {
       message: getProjectInquiryFeedbackMessage("validationError"),
       status: "error",
+      submittedInquiryType: null,
       values,
     };
   }
@@ -141,6 +159,7 @@ export async function submitProjectInquiry(
     return {
       message: getProjectInquiryFeedbackMessage("deliveryUnavailable"),
       status: "error",
+      submittedInquiryType: null,
       values,
     };
   }
@@ -157,7 +176,7 @@ export async function submitProjectInquiry(
       from: smtpConfig.from,
       html: formatEmailHtml(values),
       replyTo: getReplyTo(values.contact),
-      subject: `Project inquiry from ${values.name}`,
+      subject: `${getInquiryTypeLabel(values.inquiryType)} inquiry from ${values.name}`,
       text: buildProjectInquirySummary(values),
       to: smtpConfig.to,
     });
@@ -165,12 +184,14 @@ export async function submitProjectInquiry(
     return {
       message: getProjectInquiryFeedbackMessage("success"),
       status: "success",
+      submittedInquiryType: values.inquiryType,
       values: initialProjectInquiryValues,
     };
   } catch {
     return {
       message: getProjectInquiryFeedbackMessage("deliveryUnavailable"),
       status: "error",
+      submittedInquiryType: null,
       values,
     };
   }

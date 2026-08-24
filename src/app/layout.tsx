@@ -9,8 +9,26 @@ const sans = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Pavel Garaev",
-  description: "Projects, writing, and product notes by Pavel Garaev.",
+  metadataBase: new URL("https://pavelgaraev.com"),
+  title: {
+    default: "Pavel Garaev | Senior full-stack engineer",
+    template: "%s | Pavel Garaev",
+  },
+  description:
+    "Senior full-stack engineer working on AI products, data platforms, web applications, Next.js, and React Native apps.",
+  authors: [{ name: "Pavel Garaev", url: "https://pavelgaraev.com" }],
+  creator: "Pavel Garaev",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    description:
+      "Full-stack engineering for AI products, data platforms, web applications, and mobile apps.",
+    siteName: "Pavel Garaev",
+    title: "Pavel Garaev | Senior full-stack engineer",
+    type: "website",
+    url: "/",
+  },
 };
 
 const GTM_ID = "GTM-525FSMMS";
@@ -22,9 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${sans.variable} bg-stone-950 text-stone-100 antialiased`}
-      >
+      <body className={`${sans.variable} bg-white text-slate-950 antialiased`}>
         <noscript>
           <iframe
             src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
