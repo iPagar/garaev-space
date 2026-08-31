@@ -5,6 +5,7 @@ const navigation = [
   { href: "/solutions", label: "Who I help" },
   { href: "/services", label: "Services" },
   { href: "/case-studies", label: "Case studies" },
+  { href: "/pricing", label: "Pricing" },
   { href: "/blog", label: "Writing" },
   { href: "/contact", label: "Contact" },
 ];

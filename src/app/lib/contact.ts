@@ -82,10 +82,10 @@ export const projectTimelines = [
 ] as const;
 
 export const budgetRanges = [
-  "$1k-$3k",
-  "$3k-$7k",
-  "$7k-$15k",
-  "$15k+",
+  "$1,500–$5,000",
+  "$5,000–$15,000",
+  "$15,000–$30,000",
+  "Need help estimating",
 ] as const;
 
 export const initialProjectInquiryValues: ProjectInquiryValues = {
