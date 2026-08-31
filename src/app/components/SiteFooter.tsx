@@ -2,6 +2,7 @@ import Link from "next/link";
 import { socialLinks } from "../lib/site";
 
 const navigation = [
+  { href: "/solutions", label: "Who I help" },
   { href: "/services", label: "Services" },
   { href: "/case-studies", label: "Case studies" },
   { href: "/blog", label: "Writing" },

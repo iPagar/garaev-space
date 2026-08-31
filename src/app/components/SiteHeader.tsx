@@ -1,15 +1,15 @@
 import Link from "next/link";
 
 const navigation = [
+  { href: "/solutions", label: "Solutions" },
   { href: "/services", label: "Services" },
   { href: "/case-studies", label: "Case studies" },
-  { href: "/#products", label: "Products" },
   { href: "/blog", label: "Writing" },
 ];
 
 export default function SiteHeader() {
   return (
-    <header className="border-b border-slate-200 bg-white">
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
       <nav
         aria-label="Global navigation"
         className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-5 lg:px-8"

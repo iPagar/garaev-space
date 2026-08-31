@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { getAllPosts } from "./lib/blog";
 import { caseStudies } from "./lib/cases";
 import { services } from "./lib/services";
+import { allSolutions } from "./lib/solutions";
 
 const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://pavelgaraev.com"
@@ -27,6 +28,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${SITE_URL}/services`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/solutions`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.9,
@@ -61,6 +68,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
+  const solutionPages: MetadataRoute.Sitemap = allSolutions.map((solution) => ({
+    url: `${SITE_URL}${solution.path}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
   const blogPages: MetadataRoute.Sitemap = posts.map((post) => ({
     url: `${SITE_URL}/blog/${post.slug}`,
     lastModified: new Date(post.publishedAt),
@@ -68,5 +82,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...servicePages, ...caseStudyPages, ...blogPages];
+  return [
+    ...staticPages,
+    ...solutionPages,
+    ...servicePages,
+    ...caseStudyPages,
+    ...blogPages,
+  ];
 }

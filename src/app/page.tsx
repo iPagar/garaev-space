@@ -6,10 +6,12 @@ import ProjectCard from "./components/ProjectCard";
 import ServiceCard from "./components/ServiceCard";
 import SiteFooter from "./components/SiteFooter";
 import SiteHeader from "./components/SiteHeader";
+import SolutionCard from "./components/SolutionCard";
 import { getLatestPosts } from "./lib/blog";
 import { caseStudies } from "./lib/cases";
 import { services } from "./lib/services";
 import { ownMobileProjects, ownWebsiteProjects } from "./lib/site";
+import { allSolutions } from "./lib/solutions";
 
 const facts = [
   { label: "Production engineering", value: "6+ years" },
@@ -143,7 +145,34 @@ export default async function Home() {
         </div>
       </section>
 
-      <section id="case-studies" className="bg-slate-50 py-24 sm:py-32">
+      <section className="border-y border-slate-200 bg-slate-50 py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-3xl">
+              <h2 className="text-4xl font-semibold tracking-tight text-balance text-slate-950 sm:text-5xl">
+                Who I help
+              </h2>
+              <p className="mt-6 text-lg/8 text-slate-600">
+                Engineering shaped around the workflow and constraints of the
+                team buying the work.
+              </p>
+            </div>
+            <Link
+              href="/solutions"
+              className="shrink-0 text-sm font-semibold text-blue-700 hover:text-blue-900"
+            >
+              View all client types <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+          <div className="mt-14 grid gap-x-8 gap-y-12 sm:grid-cols-2">
+            {allSolutions.map((solution) => (
+              <SolutionCard key={solution.slug} solution={solution} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="case-studies" className="bg-white py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-3xl">
@@ -253,7 +282,7 @@ export default async function Home() {
                 delivery.
               </p>
             </div>
-            <div className="mt-12 grid gap-10 border-t border-slate-200 pt-10 lg:grid-cols-3">
+            <div className="mt-12 grid gap-10 lg:grid-cols-3">
               {latestPosts.map((post) => (
                 <article key={post.slug} className="flex flex-col">
                   <time
