@@ -1,15 +1,14 @@
 import Link from "next/link";
 import type { BlogPost } from "../lib/blog";
 
-interface BlogCardProps {
-  post: BlogPost;
-}
-
-export default function BlogCard({ post }: BlogCardProps) {
+export default function BlogCard({ post }: { post: BlogPost }) {
   return (
-    <Link href={`/blog/${post.slug}`} className="group block h-full">
-      <article className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 transition hover:border-slate-300 hover:shadow-md">
-        <div className="mb-5 flex flex-wrap items-center gap-3 text-sm text-slate-500">
+    <article className="border border-neutral-300">
+      <Link
+        href={`/blog/${post.slug}`}
+        className="flex h-full flex-col items-start gap-4 p-6 hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black"
+      >
+        <div className="flex flex-wrap gap-3 text-xs text-neutral-600">
           <time dateTime={post.publishedAt}>
             {new Intl.DateTimeFormat("en", {
               day: "numeric",
@@ -19,24 +18,9 @@ export default function BlogCard({ post }: BlogCardProps) {
           </time>
           <span>{post.readingTime}</span>
         </div>
-
-        <h2 className="mb-4 text-2xl font-semibold tracking-tight text-slate-950 group-hover:text-blue-700">
-          {post.title}
-        </h2>
-
-        <p className="mb-6 text-sm leading-7 text-slate-600">{post.excerpt}</p>
-
-        <div className="mt-auto flex flex-wrap items-center gap-2">
-          {post.tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      </article>
-    </Link>
+        <h3 className="text-2xl font-medium">{post.title}</h3>
+        <p className="text-sm/7 text-neutral-600">{post.excerpt}</p>
+      </Link>
+    </article>
   );
 }

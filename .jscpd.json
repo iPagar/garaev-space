@@ -1,0 +1,12 @@
+{
+  "minLines": 5,
+  "minTokens": 50,
+  "threshold": 0,
+  "reporters": ["console"],
+  "ignore": [
+    "**/.git/**",
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/package-lock.json"
+  ]
+}

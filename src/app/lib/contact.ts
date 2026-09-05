@@ -1,158 +1,102 @@
 export const contactConfig = {
   email: "contact@pavelgaraev.com",
-  telegramHandle: "@ipagar",
-  telegramUrl: "https://t.me/ipagar",
-  responseTime: "I usually reply within 1-2 business days.",
+  responseTime: "I usually reply within 1–2 business days.",
 } as const;
 
-export type PreferredLanguage = "english" | "russian";
-export type InquiryType = "project" | "role";
-
 export type ProjectInquiryValues = {
-  budgetRange: string;
-  contact: string;
-  inquiryType: InquiryType;
-  links: string;
-  message: string;
   name: string;
-  preferredLanguage: PreferredLanguage;
-  timeline: string;
-  workContext: string;
+  email: string;
+  organization: string;
+  message: string;
 };
+
+export type ProjectInquiryErrors = Partial<
+  Record<keyof ProjectInquiryValues, string>
+>;
 
 export type ProjectInquiryActionState = {
   message: string;
   status: "idle" | "success" | "error";
-  submittedInquiryType: InquiryType | null;
+  fieldErrors: ProjectInquiryErrors;
   values: ProjectInquiryValues;
 };
 
-type ProjectInquiryFeedbackKey =
-  | "validationError"
-  | "deliveryUnavailable"
-  | "success";
-
-export const preferredLanguages = [
-  {
-    value: "russian",
-    label: "Русский",
-    description: "Отвечу на русском.",
-  },
-  {
-    value: "english",
-    label: "English",
-    description: "I will reply in English.",
-  },
-] as const;
-
-export const inquiryTypes = [
-  {
-    value: "project",
-    label: "Project",
-    description:
-      "A new product, an existing system, or focused engineering work.",
-  },
-  {
-    value: "role",
-    label: "Role",
-    description: "A full-time, contract, or part-time engineering role.",
-  },
-] as const;
-
-export const projectContexts = [
-  "Idea",
-  "Designs ready",
-  "Existing product",
-  "Need audit or consultation",
-  "Need end-to-end build",
-] as const;
-
-export const roleContexts = [
-  "Full-time role",
-  "Contract role",
-  "Part-time role",
-  "Advisory work",
-] as const;
-
-export const projectTimelines = [
-  "ASAP",
-  "Within 2-4 weeks",
-  "Within 1-3 months",
-  "Just exploring",
-] as const;
-
-export const budgetRanges = [
-  "$1,500–$5,000",
-  "$5,000–$15,000",
-  "$15,000–$30,000",
-  "Need help estimating",
-] as const;
+export const inquiryLimits = {
+  name: 120,
+  email: 254,
+  organization: 200,
+  message: 10000,
+} as const;
 
 export const initialProjectInquiryValues: ProjectInquiryValues = {
-  budgetRange: budgetRanges[0],
-  contact: "",
-  inquiryType: inquiryTypes[0].value,
-  links: "",
-  message: "",
   name: "",
-  preferredLanguage: preferredLanguages[0].value,
-  timeline: projectTimelines[1],
-  workContext: projectContexts[0],
+  email: "",
+  organization: "",
+  message: "",
 };
 
 export const initialProjectInquiryActionState: ProjectInquiryActionState = {
   message: "",
   status: "idle",
-  submittedInquiryType: null,
+  fieldErrors: {},
   values: initialProjectInquiryValues,
 };
 
-export function getLanguageLabel(language: PreferredLanguage) {
-  return (
-    preferredLanguages.find((option) => option.value === language)?.label ??
-    language
-  );
+export function validateProjectInquiry(
+  values: ProjectInquiryValues,
+): ProjectInquiryErrors {
+  const errors: ProjectInquiryErrors = {};
+  if (!values.name.trim()) errors.name = "Please enter your name.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim()))
+    errors.email = "Please enter a valid email address.";
+  if (!values.message.trim())
+    errors.message = "Please tell me a little about your project or role.";
+  for (const key of Object.keys(
+    inquiryLimits,
+  ) as (keyof ProjectInquiryValues)[]) {
+    if (values[key].length > inquiryLimits[key])
+      errors[key] = `Please use no more than ${inquiryLimits[key]} characters.`;
+  }
+  return errors;
 }
 
-export function getInquiryTypeLabel(inquiryType: InquiryType) {
-  return (
-    inquiryTypes.find((option) => option.value === inquiryType)?.label ??
-    inquiryType
-  );
+export function extractProjectInquiryValues(
+  formData: FormData,
+): ProjectInquiryValues {
+  function value(key: keyof ProjectInquiryValues) {
+    const entry = formData.get(key);
+    return typeof entry === "string" ? entry : "";
+  }
+  return {
+    name: value("name"),
+    email: value("email"),
+    organization: value("organization"),
+    message: value("message"),
+  };
 }
 
 export function buildProjectInquirySummary(values: ProjectInquiryValues) {
-  const isProject = values.inquiryType === "project";
-
   return [
-    `${getInquiryTypeLabel(values.inquiryType)} inquiry`,
+    "Website inquiry",
     "",
-    `Preferred language: ${getLanguageLabel(values.preferredLanguage)}`,
-    `Name: ${values.name.trim() || "-"}`,
-    `Contact: ${values.contact.trim() || "-"}`,
-    `${isProject ? "Project stage" : "Role type"}: ${values.workContext}`,
-    `Timeline: ${values.timeline}`,
-    ...(isProject ? [`Budget range: ${values.budgetRange}`] : []),
-    `Links: ${values.links.trim() || "-"}`,
+    `Name: ${values.name.trim()}`,
+    `Email: ${values.email.trim()}`,
+    `Organization: ${values.organization.trim() || "Not provided"}`,
     "",
-    "Details",
-    values.message.trim() || "-",
+    "Project details",
+    values.message.trim(),
   ].join("\n");
 }
 
 export function getProjectInquiryFeedbackMessage(
-  key: ProjectInquiryFeedbackKey,
+  key: "validationError" | "deliveryUnavailable" | "success",
 ) {
-  const errorMessages = {
+  const messages = {
+    validationError: "Please check the highlighted fields.",
     deliveryUnavailable:
-      "The message did not go through. Please try again or contact me by email or Telegram.",
-    validationError:
-      "Please fill out the required fields before sending the inquiry.",
-  } satisfies Record<Exclude<ProjectInquiryFeedbackKey, "success">, string>;
-
-  if (key !== "success") {
-    return errorMessages[key];
-  }
-
-  return "Your message has been sent. I will get back to you by email or Telegram.";
+      "Your message could not be sent. Your details are still here — please try again or email me directly.",
+    success:
+      "Thanks — your message has been received. I’ll reply to the email address you provided.",
+  };
+  return messages[key];
 }

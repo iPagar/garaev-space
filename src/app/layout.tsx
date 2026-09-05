@@ -1,31 +1,28 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
 import Script from "next/script";
+import SiteFooter from "./components/SiteFooter";
+import SiteHeader from "./components/SiteHeader";
+import { siteConfig } from "./lib/site";
 import "./globals.css";
 
-const sans = Manrope({
-  variable: "--font-sans",
-  subsets: ["latin"],
-});
+const siteTitle = `${siteConfig.name} | Design & engineering`;
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://pavelgaraev.com"),
+  description: siteConfig.description,
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Pavel Garaev | Senior full-stack engineer",
-    template: "%s | Pavel Garaev",
+    default: siteTitle,
+    template: `%s | ${siteConfig.name}`,
   },
-  description:
-    "Senior full-stack engineer working on AI products, data platforms, web applications, Next.js, and React Native apps.",
-  authors: [{ name: "Pavel Garaev", url: "https://pavelgaraev.com" }],
-  creator: "Pavel Garaev",
+  authors: [{ name: siteConfig.name, url: siteConfig.url }],
+  creator: siteConfig.name,
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    description:
-      "Full-stack engineering for AI products, data platforms, web applications, and mobile apps.",
-    siteName: "Pavel Garaev",
-    title: "Pavel Garaev | Senior full-stack engineer",
+    description: siteConfig.description,
+    siteName: siteConfig.name,
+    title: siteTitle,
     type: "website",
     url: "/",
   },
@@ -39,18 +36,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${sans.variable} bg-white text-slate-950 antialiased`}>
+    <html lang="en" className="scroll-pt-32">
+      <body className="min-h-screen bg-white font-sans text-black antialiased selection:bg-black selection:text-white">
         <noscript>
           <iframe
             src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
             height="0"
             width="0"
-            style={{ display: "none", visibility: "hidden" }}
+            className="invisible hidden"
             title="Google Tag Manager"
           />
         </noscript>
-        {children}
+        <SiteHeader />
+        <main id="main-content" tabIndex={-1}>
+          {children}
+        </main>
+        <SiteFooter />
         <Script id="google-tag-manager" strategy="afterInteractive">
           {`
             (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':

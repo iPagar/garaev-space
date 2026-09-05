@@ -1,111 +1,65 @@
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { cache } from "react";
+import { parseFrontmatter } from "./markdown";
+
+const CASES_DIRECTORY = path.join(process.cwd(), "content", "case-studies");
+
 export type CaseStudy = {
-  context: string;
-  contribution: string[];
-  delivered: string[];
-  metaDescription: string;
-  relatedServiceSlugs: string[];
-  result: string;
   slug: string;
-  stack: string[];
-  summary: string;
   title: string;
+  summary?: string;
+  serviceSlug: string;
+  featured?: boolean;
+  order: number;
+  draft: boolean;
+  body: string;
 };
 
-export const caseStudies: CaseStudy[] = [
-  {
-    slug: "investigation-data-platform",
-    title: "Investigation data platform",
-    summary:
-      "A production system for persistent search, external data collection, structured findings, and graph-based investigation work.",
-    metaDescription:
-      "A full-stack investigation platform combining persistent search, external integrations, LLM-assisted structuring, PostgreSQL, and Neo4j.",
-    context:
-      "The product brings investigation work into one application. It connects external sources, stores structured findings, supports persistent searches, and presents relationships through a graph interface.",
-    contribution: [
-      "Worked across architecture, backend, frontend, and production delivery",
-      "Built persistent search and external integration workflows",
-      "Implemented LLM-assisted structuring with schema validation",
-      "Connected relational data with graph-based exploration",
-      "Added application workflows for authentication, exports, and operational use",
-    ],
-    delivered: [
-      "Search and investigation workflows",
-      "External source integrations",
-      "Structured LLM output",
-      "Graph exploration interface",
-      "Exports and production operations",
-    ],
-    result:
-      "The delivered system supports investigation work from data collection and structuring through relationship analysis and export.",
-    stack: [
-      "TypeScript",
-      "Next.js",
-      "NestJS",
-      "PostgreSQL",
-      "Neo4j",
-      "OpenAI",
-      "Docker",
-    ],
-    relatedServiceSlugs: ["web-application-development", "nextjs-development"],
-  },
-  {
-    slug: "operations-data-platform",
-    title: "Operations data platform",
-    summary:
-      "An internal application for managing complex records, validation, search, filters, exports, and day-to-day operational workflows.",
-    metaDescription:
-      "An internal operations platform for complex records, validation, search, filters, exports, and administrative workflows.",
-    context:
-      "The team needed a reliable interface for working with a large operational dataset. The application had to support structured editing, validation, search, filters, and exports without moving work between unrelated tools.",
-    contribution: [
-      "Designed application workflows around operational tasks",
-      "Built data-heavy tables, filters, and record views",
-      "Implemented validation and controlled editing",
-      "Added import and export workflows",
-      "Worked on API behavior, testing, and production stability",
-    ],
-    delivered: [
-      "Record management",
-      "Search and filters",
-      "Validation workflows",
-      "Imports and exports",
-      "Administrative access controls",
-    ],
-    result:
-      "The application consolidates record management and routine operational work in one controlled interface.",
-    stack: ["TypeScript", "React", "Next.js", "Node.js", "PostgreSQL", "REST"],
-    relatedServiceSlugs: ["web-application-development", "nextjs-development"],
-  },
-  {
-    slug: "cross-platform-banking-application",
-    title: "Cross-platform banking application",
-    summary:
-      "A React Native application for iOS and Android with onboarding, account workflows, payments, forms, and backend integration.",
-    metaDescription:
-      "A React Native banking application for iOS and Android with onboarding, payments, forms, and backend integration.",
-    context:
-      "The mobile product needed a shared implementation for iOS and Android while retaining the product flows expected from a banking application.",
-    contribution: [
-      "Built cross-platform interfaces and navigation",
-      "Implemented onboarding and form workflows",
-      "Integrated account and payment APIs",
-      "Handled validation and error states",
-      "Supported release and production fixes",
-    ],
-    delivered: [
-      "iOS and Android application",
-      "Onboarding flows",
-      "Account workflows",
-      "Payment integration",
-      "Form validation and error handling",
-    ],
-    result:
-      "The delivered application covered the core mobile banking flows in one React Native codebase for both platforms.",
-    stack: ["TypeScript", "React Native", "iOS", "Android", "REST", "Payments"],
-    relatedServiceSlugs: ["react-native-development"],
-  },
-];
+function createCaseStudy(slug: string, source: string): CaseStudy {
+  const { frontmatter, body } = parseFrontmatter(source);
+  const { title, summary, serviceSlug, featured, draft } = frontmatter;
+  const order = Number(frontmatter.order);
 
-export function getCaseStudyBySlug(slug: string) {
+  if (
+    typeof title !== "string" ||
+    !title.trim() ||
+    (summary !== undefined && typeof summary !== "string") ||
+    typeof serviceSlug !== "string" ||
+    !serviceSlug.trim() ||
+    (featured !== undefined && typeof featured !== "boolean") ||
+    typeof draft !== "boolean" ||
+    typeof frontmatter.order !== "string" ||
+    !Number.isInteger(order) ||
+    order < 1
+  ) {
+    throw new Error(`Invalid frontmatter in case study: ${slug}`);
+  }
+
+  return { slug, title, summary, serviceSlug, featured, order, draft, body };
+}
+
+export const getCaseStudies = cache(async function getCaseStudies(): Promise<
+  CaseStudy[]
+> {
+  const files = await fs.readdir(CASES_DIRECTORY);
+  const caseStudies = await Promise.all(
+    files
+      .filter((file) => file.endsWith(".md"))
+      .map(async (file) => {
+        const source = await fs.readFile(
+          path.join(CASES_DIRECTORY, file),
+          "utf8",
+        );
+        return createCaseStudy(file.slice(0, -3), source);
+      }),
+  );
+  return caseStudies.sort(
+    (a, b) => a.order - b.order || a.slug.localeCompare(b.slug),
+  );
+});
+
+export async function getCaseStudyBySlug(slug: string) {
+  const caseStudies = await getCaseStudies();
   return caseStudies.find((caseStudy) => caseStudy.slug === slug);
 }

@@ -1,98 +1,44 @@
 import type { MetadataRoute } from "next";
 import { getAllPosts } from "./lib/blog";
-import { caseStudies } from "./lib/cases";
-import { services } from "./lib/services";
-import { allSolutions } from "./lib/solutions";
 
-const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://pavelgaraev.com"
-).replace(/\/$/, "");
+import { siteConfig } from "./lib/site";
 export const dynamic = "force-static";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await getAllPosts();
-  const now = new Date();
 
-  const staticPages: MetadataRoute.Sitemap = [
+  const pages: MetadataRoute.Sitemap = [
+    { url: `${siteConfig.url}/`, changeFrequency: "monthly", priority: 1 },
     {
-      url: `${SITE_URL}/`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 1,
+      url: `${siteConfig.url}/services`,
+      changeFrequency: "monthly",
+      priority: 0.9,
     },
     {
-      url: `${SITE_URL}/blog`,
-      lastModified: now,
-      changeFrequency: "weekly",
+      url: `${siteConfig.url}/case-studies`,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    { url: `${siteConfig.url}/blog`, changeFrequency: "weekly", priority: 0.8 },
+    {
+      url: `${siteConfig.url}/contact`,
+      changeFrequency: "monthly",
       priority: 0.8,
     },
     {
-      url: `${SITE_URL}/services`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${SITE_URL}/solutions`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${SITE_URL}/case-studies`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${SITE_URL}/pricing`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${SITE_URL}/contact`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
+      url: `${siteConfig.url}/privacy`,
+      changeFrequency: "yearly",
+      priority: 0.2,
     },
   ];
 
-  const servicePages: MetadataRoute.Sitemap = services.map((service) => ({
-    url: `${SITE_URL}/services/${service.slug}`,
-    lastModified: now,
-    changeFrequency: "monthly",
-    priority: 0.8,
-  }));
-
-  const caseStudyPages: MetadataRoute.Sitemap = caseStudies.map(
-    (caseStudy) => ({
-      url: `${SITE_URL}/case-studies/${caseStudy.slug}`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    }),
-  );
-
-  const solutionPages: MetadataRoute.Sitemap = allSolutions.map((solution) => ({
-    url: `${SITE_URL}${solution.path}`,
-    lastModified: now,
-    changeFrequency: "monthly",
-    priority: 0.8,
-  }));
-
-  const blogPages: MetadataRoute.Sitemap = posts.map((post) => ({
-    url: `${SITE_URL}/blog/${post.slug}`,
-    lastModified: new Date(post.publishedAt),
-    changeFrequency: "monthly",
-    priority: 0.7,
-  }));
-
   return [
-    ...staticPages,
-    ...solutionPages,
-    ...servicePages,
-    ...caseStudyPages,
-    ...blogPages,
+    ...pages,
+    ...posts.map((post) => ({
+      url: `${siteConfig.url}/blog/${post.slug}`,
+      lastModified: new Date(post.publishedAt),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
   ];
 }

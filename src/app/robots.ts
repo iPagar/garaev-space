@@ -1,8 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://pavelgaraev.com"
-).replace(/\/$/, "");
+import { siteConfig } from "./lib/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -10,6 +8,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    sitemap: `${siteConfig.url}/sitemap.xml`,
   };
 }

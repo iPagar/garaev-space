@@ -1,42 +1,46 @@
-import Link from "next/link";
+"use client";
 
-const navigation = [
-  { href: "/solutions", label: "Solutions" },
-  { href: "/services", label: "Services" },
-  { href: "/case-studies", label: "Case studies" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/blog", label: "Writing" },
-];
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { navigation } from "../lib/navigation";
+import { siteConfig } from "../lib/site";
 
 export default function SiteHeader() {
+  const pathname = usePathname();
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
+    <header className="sticky top-0 z-30 border-b border-neutral-300 bg-white">
+      <a
+        href="#main-content"
+        className="absolute -top-24 left-4 z-50 border border-black bg-white px-4 py-3 focus:top-3"
+      >
+        Skip to content
+      </a>
       <nav
-        aria-label="Global navigation"
-        className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-5 lg:px-8"
+        aria-label="Main"
+        className="mx-auto flex max-w-6xl flex-wrap items-center gap-6 px-5 py-5 md:px-8"
       >
         <Link
           href="/"
-          className="shrink-0 text-base font-semibold tracking-tight text-slate-950"
+          className="font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black"
         >
-          Pavel Garaev
+          {siteConfig.name}
         </Link>
-
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="order-3 flex w-full gap-6 text-sm md:order-none md:ml-auto md:w-auto">
           {navigation.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm font-medium text-slate-600 hover:text-slate-950"
+              aria-current={pathname.startsWith(item.href) ? "page" : undefined}
+              className="py-1 hover:underline aria-[current=page]:underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black"
             >
               {item.label}
             </Link>
           ))}
         </div>
-
         <Link
           href="/contact"
-          className="rounded-md bg-slate-950 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-950"
+          aria-current={pathname === "/contact" ? "page" : undefined}
+          className="ml-auto border border-black px-4 py-2 text-sm font-medium hover:bg-neutral-100 aria-[current=page]:bg-black aria-[current=page]:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black md:ml-0"
         >
           Contact
         </Link>

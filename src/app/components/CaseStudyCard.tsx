@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { CaseStudy } from "../lib/cases";
+import { getServiceBySlug } from "../lib/services";
 
-export default function CaseStudyCard({
+export default async function CaseStudyCard({
   caseStudy,
   headingLevel = "h3",
 }: {
@@ -9,30 +10,21 @@ export default function CaseStudyCard({
   headingLevel?: "h2" | "h3";
 }) {
   const Heading = headingLevel;
+  const service = await getServiceBySlug(caseStudy.serviceSlug);
+  if (!service)
+    throw new Error(`Missing service for case study: ${caseStudy.slug}`);
 
   return (
-    <article className="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-slate-300 hover:shadow-md sm:p-8">
-      <Heading className="text-2xl font-semibold tracking-tight text-slate-950">
-        {caseStudy.title}
-      </Heading>
-      <p className="mt-4 flex-auto text-base/7 text-slate-600">
-        {caseStudy.summary}
-      </p>
-      <div className="mt-6 flex flex-wrap gap-2">
-        {caseStudy.stack.slice(0, 4).map((item) => (
-          <span
-            key={item}
-            className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600"
-          >
-            {item}
-          </span>
-        ))}
-      </div>
+    <article className="min-w-0 border border-neutral-300">
       <Link
         href={`/case-studies/${caseStudy.slug}`}
-        className="mt-8 text-sm font-semibold text-blue-700 hover:text-blue-900"
+        className="flex h-full flex-col items-start gap-4 p-6 hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black"
       >
-        Read case study <span aria-hidden="true">→</span>
+        <p className="text-xs text-neutral-600">{service.shortTitle}</p>
+        <Heading className="text-2xl font-medium">{caseStudy.title}</Heading>
+        {caseStudy.summary && (
+          <p className="text-sm/7 text-neutral-600">{caseStudy.summary}</p>
+        )}
       </Link>
     </article>
   );

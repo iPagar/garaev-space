@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { parseFrontmatter } from "./markdown";
 
 const BLOG_DIRECTORY = path.join(process.cwd(), "content", "blog");
 const MARKDOWN_EXTENSION = ".md";
@@ -8,14 +9,20 @@ const WORDS_PER_MINUTE = 200;
 interface BlogPostFrontmatter {
   title: string;
   excerpt: string;
-  publishedAt: string;
-  tags: string[];
 }
 
 export interface BlogPost extends BlogPostFrontmatter {
+  draft: false;
+  publishedAt: string;
   slug: string;
   body: string;
   readingTime: string;
+}
+
+export interface DraftBlogPost extends BlogPostFrontmatter {
+  draft: true;
+  slug: string;
+  body: string;
 }
 
 export type MarkdownBlock =
@@ -25,11 +32,6 @@ export type MarkdownBlock =
   | { type: "ordered-list"; items: string[] }
   | { type: "blockquote"; content: string }
   | { type: "code"; content: string; language: string };
-
-interface ParsedFrontmatter {
-  frontmatter: Record<string, unknown>;
-  body: string;
-}
 
 function getPostFilePath(slug: string) {
   return path.join(BLOG_DIRECTORY, `${slug}${MARKDOWN_EXTENSION}`);
@@ -43,73 +45,33 @@ function isMarkdownFile(fileName: string) {
   return fileName.endsWith(MARKDOWN_EXTENSION);
 }
 
-function parseFrontmatterValue(value: string) {
-  const trimmedValue = value.trim();
-
-  if (trimmedValue.startsWith("[") && trimmedValue.endsWith("]")) {
-    return trimmedValue
-      .slice(1, -1)
-      .split(",")
-      .map((item) => item.trim().replace(/^["']|["']$/g, ""))
-      .filter(Boolean);
-  }
-
-  return trimmedValue.replace(/^["']|["']$/g, "");
-}
-
-function parseFrontmatterLine(
-  accumulator: Record<string, unknown>,
-  line: string,
-) {
-  const separatorIndex = line.indexOf(":");
-  if (separatorIndex === -1) {
-    return accumulator;
-  }
-
-  const key = line.slice(0, separatorIndex).trim();
-  const value = line.slice(separatorIndex + 1);
-  accumulator[key] = parseFrontmatterValue(value);
-  return accumulator;
-}
-
-function parseFrontmatter(source: string): ParsedFrontmatter {
-  if (!source.startsWith("---\n")) {
-    throw new Error("Markdown file is missing frontmatter.");
-  }
-
-  const endIndex = source.indexOf("\n---\n", 4);
-  if (endIndex === -1) {
-    throw new Error("Markdown frontmatter is not closed.");
-  }
-
-  const rawFrontmatter = source.slice(4, endIndex);
-  const body = source.slice(endIndex + 5).trim();
-
-  return {
-    frontmatter: rawFrontmatter
-      .split("\n")
-      .reduce<Record<string, unknown>>(parseFrontmatterLine, {}),
-    body,
-  };
-}
-
 function assertFrontmatter(
   slug: string,
   frontmatter: Record<string, unknown>,
-): BlogPostFrontmatter {
-  const { title, excerpt, publishedAt, tags } = frontmatter;
+): BlogPostFrontmatter &
+  ({ draft: true } | { draft: false; publishedAt: string }) {
+  const { title, excerpt, publishedAt, draft } = frontmatter;
 
   if (
     typeof title !== "string" ||
     typeof excerpt !== "string" ||
-    typeof publishedAt !== "string" ||
-    !Array.isArray(tags) ||
-    tags.some((tag) => typeof tag !== "string")
+    typeof draft !== "boolean"
   ) {
     throw new Error(`Invalid frontmatter in blog post: ${slug}`);
   }
 
-  return { title, excerpt, publishedAt, tags };
+  if (draft) return { title, excerpt, draft: true };
+
+  if (
+    typeof publishedAt !== "string" ||
+    Number.isNaN(Date.parse(publishedAt))
+  ) {
+    throw new Error(
+      `Missing or invalid publication date in blog post: ${slug}`,
+    );
+  }
+
+  return { title, excerpt, publishedAt, draft: false };
 }
 
 function estimateReadingTime(markdown: string) {
@@ -126,14 +88,19 @@ function estimateReadingTime(markdown: string) {
   return `${minutes} min read`;
 }
 
-function createPost(slug: string, source: string): BlogPost {
+function createPost(slug: string, source: string): BlogPost | DraftBlogPost {
   const { frontmatter, body } = parseFrontmatter(source);
+  const metadata = assertFrontmatter(slug, frontmatter);
+
+  if (metadata.draft) return { ...metadata, slug, body };
+
+  if (!body) throw new Error(`Published blog post has no content: ${slug}`);
 
   return {
     slug,
     body,
     readingTime: estimateReadingTime(body),
-    ...assertFrontmatter(slug, frontmatter),
+    ...metadata,
   };
 }
 
@@ -285,14 +252,26 @@ function consumeParagraph(lines: string[], startIndex: number) {
   };
 }
 
-export async function getAllPosts() {
+async function readPosts() {
   const files = await fs.readdir(BLOG_DIRECTORY);
   const markdownFiles = files.filter(isMarkdownFile);
-  const posts = await Promise.all(
+  return Promise.all(
     markdownFiles.map((fileName) => readPost(getSlugFromFileName(fileName))),
   );
+}
 
-  return posts.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+export async function getAllPosts() {
+  const posts = await readPosts();
+  return posts
+    .filter((post): post is BlogPost => !post.draft)
+    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+}
+
+export async function getUpcomingPosts() {
+  const posts = await readPosts();
+  return posts
+    .filter((post): post is DraftBlogPost => post.draft)
+    .sort((a, b) => a.slug.localeCompare(b.slug));
 }
 
 export async function getLatestPosts(limit = 3) {

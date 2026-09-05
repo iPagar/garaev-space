@@ -2,9 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ContactCta from "../../components/ContactCta";
-import SiteFooter from "../../components/SiteFooter";
-import SiteHeader from "../../components/SiteHeader";
-import { getAllPosts, getPostBySlug, parseMarkdown } from "../../lib/blog";
+import ContentPending from "../../components/ContentPending";
+import {
+  getAllPosts,
+  getPostBySlug,
+  getUpcomingPosts,
+  parseMarkdown,
+} from "../../lib/blog";
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -13,9 +17,12 @@ interface BlogPostPageProps {
 }
 
 export async function generateStaticParams() {
-  const posts = await getAllPosts();
+  const [posts, upcomingPosts] = await Promise.all([
+    getAllPosts(),
+    getUpcomingPosts(),
+  ]);
 
-  return posts.map((post) => ({
+  return [...posts, ...upcomingPosts].map((post) => ({
     slug: post.slug,
   }));
 }
@@ -26,14 +33,13 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = await getPostBySlug(slug);
 
-  if (!post) {
-    return { title: "Post not found" };
-  }
+  if (!post) notFound();
 
   return {
     title: post.title,
     description: post.excerpt,
     alternates: { canonical: `/blog/${post.slug}` },
+    robots: post.draft ? { index: false, follow: true } : undefined,
     openGraph: {
       description: post.excerpt,
       title: post.title,
@@ -47,25 +53,32 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
 
-  if (!post) {
-    notFound();
+  if (!post) notFound();
+
+  if (post.draft) {
+    return (
+      <ContentPending
+        title={post.title}
+        backHref="/blog"
+        backLabel="All articles"
+      />
+    );
   }
 
   const blocks = parseMarkdown(post.body);
 
   return (
-    <main className="min-h-screen bg-white text-slate-950">
-      <SiteHeader />
+    <>
       <article>
-        <header className="border-b border-slate-200 bg-white py-16 sm:py-24">
+        <header className="border-b border-neutral-300 py-16 sm:py-24">
           <div className="mx-auto max-w-4xl px-6 lg:px-8">
             <Link
               href="/blog"
-              className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+              className="text-sm font-semibold text-black hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black"
             >
-              ← All writing
+              All articles
             </Link>
-            <div className="mt-10 flex flex-wrap items-center gap-3 text-sm text-slate-500">
+            <div className="mt-10 flex flex-wrap items-center gap-3 text-sm text-neutral-500">
               <time dateTime={post.publishedAt}>
                 {new Intl.DateTimeFormat("en", {
                   day: "numeric",
@@ -75,22 +88,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </time>
               <span>{post.readingTime}</span>
             </div>
-            <h1 className="mt-6 text-5xl font-semibold tracking-tight text-balance text-slate-950 sm:text-6xl">
+            <h1 className="mt-6 text-5xl font-semibold text-balance text-neutral-950 sm:text-6xl">
               {post.title}
             </h1>
-            <p className="mt-6 max-w-3xl text-lg/8 text-slate-600">
+            <p className="mt-6 max-w-3xl text-lg/8 text-neutral-600">
               {post.excerpt}
             </p>
-            <div className="mt-8 flex flex-wrap gap-2">
-              {post.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
           </div>
         </header>
 
@@ -103,7 +106,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 return (
                   <h2
                     key={key}
-                    className="pt-6 text-3xl font-semibold tracking-tight text-slate-950"
+                    className="pt-6 text-3xl font-semibold text-neutral-950"
                   >
                     {block.content}
                   </h2>
@@ -113,7 +116,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               return (
                 <h3
                   key={key}
-                  className="pt-3 text-2xl font-semibold tracking-tight text-slate-950"
+                  className="pt-3 text-2xl font-semibold text-neutral-950"
                 >
                   {block.content}
                 </h3>
@@ -122,7 +125,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
             if (block.type === "paragraph") {
               return (
-                <p key={key} className="text-lg/9 text-slate-700">
+                <p key={key} className="text-lg/9 text-neutral-700">
                   {block.content}
                 </p>
               );
@@ -132,7 +135,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               return (
                 <ul
                   key={key}
-                  className="grid list-disc gap-3 pl-6 text-lg/9 text-slate-700 marker:text-slate-400"
+                  className="grid list-disc gap-3 pl-6 text-lg/9 text-neutral-700 marker:text-neutral-400"
                 >
                   {block.items.map((item) => (
                     <li key={item}>{item}</li>
@@ -145,7 +148,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               return (
                 <ol
                   key={key}
-                  className="grid list-decimal gap-3 pl-6 text-lg/9 text-slate-700 marker:text-slate-400"
+                  className="grid list-decimal gap-3 pl-6 text-lg/9 text-neutral-700 marker:text-neutral-400"
                 >
                   {block.items.map((item) => (
                     <li key={item}>{item}</li>
@@ -158,7 +161,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               return (
                 <blockquote
                   key={key}
-                  className="border-l-2 border-slate-300 px-6 py-3 text-lg/9 italic text-slate-600"
+                  className="border-l-2 border-neutral-300 px-6 py-3 text-lg/9 italic text-neutral-600"
                 >
                   {block.content}
                 </blockquote>
@@ -168,7 +171,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             return (
               <pre
                 key={key}
-                className="overflow-x-auto rounded-xl bg-slate-950 p-5 text-sm/7 text-slate-100"
+                className="overflow-x-auto bg-neutral-950 p-5 text-sm/7 text-neutral-100"
               >
                 <code>{block.content}</code>
               </pre>
@@ -177,7 +180,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </div>
       </article>
       <ContactCta />
-      <SiteFooter />
-    </main>
+    </>
   );
 }

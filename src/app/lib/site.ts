@@ -1,30 +1,14 @@
-import type { ComponentType, SVGProps } from "react";
-import { LinkedInIcon, TelegramIcon } from "./social-icons";
+export const siteConfig = {
+  name: "Pavel Garaev",
+  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://pavelgaraev.com").replace(
+    /\/$/,
+    "",
+  ),
+  description:
+    "Design and engineering consultancy for research, media, and expert-led organizations.",
+} as const;
 
-type SocialLink = {
-  href: string;
-  label: string;
-  icon: ComponentType<SVGProps<SVGSVGElement>>;
-};
-
-export const socialLinks: SocialLink[] = [
-  {
-    href: "https://t.me/ipagar",
-    label: "Telegram",
-    icon: TelegramIcon,
-  },
-  {
-    href: "https://linkedin.com/in/ipagar",
-    label: "LinkedIn",
-    icon: LinkedInIcon,
-  },
-];
-
-export const ownMobileProjects = [
-  "https://apps.apple.com/us/app/supplement-scanner-supplens/id6756219517",
-  "https://apps.apple.com/app/6758587114",
-];
-
-export const ownWebsiteProjects: string[] = ["https://limemenu.org"];
-
-export const clientProjects: string[] = [];
+export const socialProfiles = {
+  telegram: { href: "https://t.me/ipagar", label: "Telegram" },
+  linkedin: { href: "https://linkedin.com/in/ipagar", label: "LinkedIn" },
+} as const;
