@@ -8,7 +8,13 @@ const CASES_DIRECTORY = path.join(process.cwd(), "content", "case-studies");
 export type CaseStudy = {
   slug: string;
   title: string;
-  summary?: string;
+  summary: string;
+  role: string;
+  projectType: string;
+  projectUrl?: string;
+  coverImage: string;
+  coverAlt: string;
+  coverCaption: string;
   serviceSlug: string;
   featured?: boolean;
   order: number;
@@ -18,13 +24,39 @@ export type CaseStudy = {
 
 function createCaseStudy(slug: string, source: string): CaseStudy {
   const { frontmatter, body } = parseFrontmatter(source);
-  const { title, summary, serviceSlug, featured, draft } = frontmatter;
+  const {
+    title,
+    summary,
+    serviceSlug,
+    featured,
+    draft,
+    role,
+    projectType,
+    projectUrl,
+    coverImage,
+    coverAlt,
+    coverCaption,
+  } = frontmatter;
   const order = Number(frontmatter.order);
 
   if (
     typeof title !== "string" ||
     !title.trim() ||
-    (summary !== undefined && typeof summary !== "string") ||
+    typeof summary !== "string" ||
+    !summary.trim() ||
+    typeof role !== "string" ||
+    !role.trim() ||
+    typeof projectType !== "string" ||
+    !projectType.trim() ||
+    (projectUrl !== undefined &&
+      (typeof projectUrl !== "string" || !projectUrl.startsWith("https://"))) ||
+    typeof coverImage !== "string" ||
+    !coverImage.startsWith("/case-studies/") ||
+    typeof coverAlt !== "string" ||
+    !coverAlt.trim() ||
+    typeof coverCaption !== "string" ||
+    !coverCaption.trim() ||
+    (!draft && !body.trim()) ||
     typeof serviceSlug !== "string" ||
     !serviceSlug.trim() ||
     (featured !== undefined && typeof featured !== "boolean") ||
@@ -36,7 +68,22 @@ function createCaseStudy(slug: string, source: string): CaseStudy {
     throw new Error(`Invalid frontmatter in case study: ${slug}`);
   }
 
-  return { slug, title, summary, serviceSlug, featured, order, draft, body };
+  return {
+    slug,
+    title,
+    summary,
+    serviceSlug,
+    featured,
+    order,
+    draft,
+    body,
+    role,
+    projectType,
+    projectUrl,
+    coverImage,
+    coverAlt,
+    coverCaption,
+  };
 }
 
 export const getCaseStudies = cache(async function getCaseStudies(): Promise<

@@ -13,11 +13,20 @@ export type Service = {
   order: number;
   draft: boolean;
   body: string;
+  caseStudySlugs: string[];
+  caseStudyIntro: string;
 };
 
 function createService(slug: string, source: string): Service {
   const { frontmatter, body } = parseFrontmatter(source);
-  const { title, shortTitle, shortDescription, draft } = frontmatter;
+  const {
+    title,
+    shortTitle,
+    shortDescription,
+    draft,
+    caseStudySlugs,
+    caseStudyIntro,
+  } = frontmatter;
   const order = Number(frontmatter.order);
 
   if (
@@ -26,6 +35,14 @@ function createService(slug: string, source: string): Service {
     typeof shortTitle !== "string" ||
     !shortTitle.trim() ||
     typeof shortDescription !== "string" ||
+    !shortDescription.trim() ||
+    !Array.isArray(caseStudySlugs) ||
+    caseStudySlugs.length === 0 ||
+    caseStudySlugs.some((slug) => typeof slug !== "string" || !slug.trim()) ||
+    new Set(caseStudySlugs).size !== caseStudySlugs.length ||
+    typeof caseStudyIntro !== "string" ||
+    !caseStudyIntro.trim() ||
+    (!draft && !body.trim()) ||
     typeof draft !== "boolean" ||
     typeof frontmatter.order !== "string" ||
     !Number.isInteger(order) ||
@@ -42,6 +59,8 @@ function createService(slug: string, source: string): Service {
     order,
     draft,
     body,
+    caseStudySlugs,
+    caseStudyIntro,
   };
 }
 
