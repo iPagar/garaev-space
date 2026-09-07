@@ -8,7 +8,7 @@ import { siteConfig } from "../lib/site";
 export default function SiteHeader() {
   const pathname = usePathname();
   return (
-    <header className="sticky top-0 z-30 border-b border-neutral-300 bg-white">
+    <header className="sticky top-0 z-30 min-h-[var(--site-header-height)] border-b border-neutral-300 bg-white">
       <a
         href="#main-content"
         className="absolute -top-24 left-4 z-50 border border-black bg-white px-4 py-3 focus:top-3"

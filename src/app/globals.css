@@ -1,1 +1,12 @@
 @import "tailwindcss";
+
+:root {
+  /* Header: vertical padding, contact button, mobile navigation row and border. */
+  --site-header-height: 131px;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --site-header-height: 79px;
+  }
+}

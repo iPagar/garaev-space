@@ -274,11 +274,6 @@ export async function getUpcomingPosts() {
     .sort((a, b) => a.slug.localeCompare(b.slug));
 }
 
-export async function getLatestPosts(limit = 3) {
-  const posts = await getAllPosts();
-  return posts.slice(0, limit);
-}
-
 export async function getPostBySlug(slug: string) {
   try {
     return await readPost(slug);
