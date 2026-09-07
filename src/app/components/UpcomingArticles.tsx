@@ -3,6 +3,7 @@ import { getUpcomingPosts } from "../lib/blog";
 
 export default async function UpcomingArticles() {
   const posts = await getUpcomingPosts();
+  if (posts.length === 0) return null;
   return (
     <div className="grid gap-6 md:grid-cols-2">
       {posts.map((post) => (

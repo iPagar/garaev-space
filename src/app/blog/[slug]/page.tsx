@@ -3,12 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ContactCta from "../../components/ContactCta";
 import ContentPending from "../../components/ContentPending";
+import MarkdownInline from "../../components/MarkdownInline";
 import {
   getAllPosts,
   getPostBySlug,
   getUpcomingPosts,
   parseMarkdown,
 } from "../../lib/blog";
+import { siteConfig } from "../../lib/site";
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -44,6 +46,8 @@ export async function generateMetadata({
       description: post.excerpt,
       title: post.title,
       type: "article",
+      authors: [siteConfig.name],
+      publishedTime: post.draft ? undefined : post.publishedAt,
       url: `/blog/${post.slug}`,
     },
   };
@@ -79,6 +83,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               All articles
             </Link>
             <div className="mt-10 flex flex-wrap items-center gap-3 text-sm text-neutral-500">
+              <span>{siteConfig.name}</span>
               <time dateTime={post.publishedAt}>
                 {new Intl.DateTimeFormat("en", {
                   day: "numeric",
@@ -108,7 +113,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                     key={key}
                     className="pt-6 text-3xl font-semibold text-neutral-950"
                   >
-                    {block.content}
+                    <MarkdownInline content={block.content} />
                   </h2>
                 );
               }
@@ -118,7 +123,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                   key={key}
                   className="pt-3 text-2xl font-semibold text-neutral-950"
                 >
-                  {block.content}
+                  <MarkdownInline content={block.content} />
                 </h3>
               );
             }
@@ -126,7 +131,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             if (block.type === "paragraph") {
               return (
                 <p key={key} className="text-lg/9 text-neutral-700">
-                  {block.content}
+                  <MarkdownInline content={block.content} />
                 </p>
               );
             }
@@ -138,7 +143,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                   className="grid list-disc gap-3 pl-6 text-lg/9 text-neutral-700 marker:text-neutral-400"
                 >
                   {block.items.map((item) => (
-                    <li key={item}>{item}</li>
+                    <li key={item}>
+                      <MarkdownInline content={item} />
+                    </li>
                   ))}
                 </ul>
               );
@@ -151,7 +158,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                   className="grid list-decimal gap-3 pl-6 text-lg/9 text-neutral-700 marker:text-neutral-400"
                 >
                   {block.items.map((item) => (
-                    <li key={item}>{item}</li>
+                    <li key={item}>
+                      <MarkdownInline content={item} />
+                    </li>
                   ))}
                 </ol>
               );
@@ -163,7 +172,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                   key={key}
                   className="border-l-2 border-neutral-300 px-6 py-3 text-lg/9 italic text-neutral-600"
                 >
-                  {block.content}
+                  <MarkdownInline content={block.content} />
                 </blockquote>
               );
             }
