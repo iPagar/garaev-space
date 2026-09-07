@@ -1,10 +1,12 @@
 import Link from "next/link";
+import BlogGrid from "./components/BlogGrid";
 import CaseStudyCard from "./components/CaseStudyCard";
 import Collaborators from "./components/Collaborators";
 import ContactCta from "./components/ContactCta";
 import HomeHero from "./components/HomeHero";
 import ServiceCard from "./components/ServiceCard";
 import UpcomingArticles from "./components/UpcomingArticles";
+import { getAllPosts } from "./lib/blog";
 import { getCaseStudies } from "./lib/cases";
 import { getServices } from "./lib/services";
 import { siteConfig, socialProfiles } from "./lib/site";
@@ -21,9 +23,10 @@ const profileSchemaJson = JSON.stringify({
 }).replace(/</g, "\\u003c");
 
 export default async function Home() {
-  const [services, caseStudies] = await Promise.all([
+  const [services, caseStudies, posts] = await Promise.all([
     getServices(),
     getCaseStudies(),
+    getAllPosts(),
   ]);
 
   return (
@@ -125,7 +128,10 @@ export default async function Home() {
             Visit the blog
           </Link>
         </div>
-        <UpcomingArticles />
+        <div className="space-y-10">
+          <UpcomingArticles />
+          {posts.length > 0 ? <BlogGrid posts={posts.slice(0, 2)} /> : null}
+        </div>
       </section>
       <ContactCta />
     </>
