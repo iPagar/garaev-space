@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { siteConfig } from "../lib/site";
+import HeroSculpture from "./HeroSculpture";
 
 export default function HomeHero() {
   return (
@@ -25,16 +25,7 @@ export default function HomeHero() {
           </Link>
         </div>
       </div>
-      <div className="relative aspect-square w-[min(100%,28svh)] justify-self-center md:w-full">
-        <Image
-          src="/hero-sculpture.png"
-          alt=""
-          fill
-          preload
-          sizes="(max-width: 767px) 28svh, (max-width: 1151px) 50vw, 520px"
-          className="object-contain"
-        />
-      </div>
+      <HeroSculpture />
     </section>
   );
 }
