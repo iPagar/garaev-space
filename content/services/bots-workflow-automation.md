@@ -5,7 +5,6 @@ shortDescription: Bots and connected workflows for collecting information, publi
 order: 4
 draft: false
 caseStudySlugs: [pageflock, ai-research-workspace]
-caseStudyIntro: Pageflock illustrates background collection and spreadsheet export. AI Research Workspace shows external tool integration and asynchronous processing. Both provide relevant automation experience for a bot or connected workflow.
 ---
 
 ## Give repetitive work a clear path

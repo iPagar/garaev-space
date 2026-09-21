@@ -5,7 +5,6 @@ shortDescription: AI tools that connect sources, support research, and turn info
 order: 1
 draft: false
 caseStudySlugs: [ai-research-workspace]
-caseStudyIntro: AI Research Workspace brings together research interfaces, external tool connections and background processing across several projects.
 ---
 
 ## AI that fits into your team’s work

@@ -5,7 +5,6 @@ shortDescription: Mobile products with a clear path from the first interaction t
 order: 3
 draft: false
 caseStudySlugs: [supplens, mugmeme, dwellscore]
-caseStudyIntro: SuppLens connects scanning with AI analysis, MugMeme combines image generation with a creative workflow, and DwellScore presents location data through a mobile interface.
 ---
 
 ## A mobile product built around a useful action

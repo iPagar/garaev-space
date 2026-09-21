@@ -103,10 +103,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
         >
           Selected work
         </h2>
-        <p className="mt-4 mb-8 max-w-3xl text-base/8 text-neutral-600">
-          {service.caseStudyIntro}
-        </p>
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="mt-8 grid gap-6 md:grid-cols-2">
           {selectedCases.map((item) => (
             <CaseStudyCard key={item.slug} caseStudy={item} />
           ))}

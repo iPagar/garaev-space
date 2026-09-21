@@ -5,7 +5,6 @@ shortDescription: Websites, publishing platforms, and interactive applications t
 order: 2
 draft: false
 caseStudySlugs: [arctic-moroshka, regions-in-focus, arctida, arctida-stakeholders]
-caseStudyIntro: Arctic Moroshka and Regions in Focus show organisational websites; Arctida demonstrates publishing with a CMS; Arctida Stakeholders turns connected research data into an interactive application.
 ---
 
 ## A website your audience and team can use
@@ -25,7 +24,7 @@ The work starts with what visitors need to find or accomplish and what your team
 
 The scope can include information architecture, responsive interfaces, content models, CMS integration, search, forms and connections to external services. For an application, it can also include the backend and data interface behind the user-facing tool.
 
-I use reusable page structures so that adding a publication or updating a programme does not require rebuilding the page. With Sanity, the editing interface can reflect the actual content your team manages: publications, people, award cycles or related projects.
+I use reusable page structures so that adding a publication or updating a programme does not require rebuilding the page. With Sanity, the editing interface can reflect the actual content your team manages: publications, authors or services.
 
 ## How the work is scoped
 

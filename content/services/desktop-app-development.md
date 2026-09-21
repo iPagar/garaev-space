@@ -5,7 +5,6 @@ shortDescription: Focused desktop tools for working with data, managing routine 
 order: 5
 draft: false
 caseStudySlugs: [pageflock, limemenu]
-caseStudyIntro: Pageflock provides a workspace for collecting, inspecting and exporting data. LimeMenu is a native macOS utility that keeps system information close at hand.
 ---
 
 ## A focused tool for work on a computer
