@@ -101,9 +101,9 @@ export const getCaseStudies = cache(async function getCaseStudies(): Promise<
         return createCaseStudy(file.slice(0, -3), source);
       }),
   );
-  return caseStudies.sort(
-    (a, b) => a.order - b.order || a.slug.localeCompare(b.slug),
-  );
+  return caseStudies
+    .filter((item) => !item.draft)
+    .sort((a, b) => a.order - b.order || a.slug.localeCompare(b.slug));
 });
 
 export async function getCaseStudyBySlug(slug: string) {

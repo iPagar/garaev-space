@@ -30,7 +30,6 @@ function createService(slug: string, source: string): Service {
     typeof shortDescription !== "string" ||
     !shortDescription.trim() ||
     !Array.isArray(caseStudySlugs) ||
-    caseStudySlugs.length === 0 ||
     caseStudySlugs.some((slug) => typeof slug !== "string" || !slug.trim()) ||
     new Set(caseStudySlugs).size !== caseStudySlugs.length ||
     (!draft && !body.trim()) ||

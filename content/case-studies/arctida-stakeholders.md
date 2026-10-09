@@ -3,7 +3,7 @@ title: Arctida Stakeholders
 summary: Interactive platform for exploring Arctic influence networks.
 serviceSlug: websites-web-applications
 order: 5
-draft: false
+draft: true
 role: Web application and data integration
 projectType: Client project
 coverImage: /case-studies/stakeholders-graph.webp

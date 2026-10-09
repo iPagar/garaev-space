@@ -3,7 +3,7 @@ title: Regions in Focus
 summary: Website for a regional civic initiative.
 serviceSlug: websites-web-applications
 order: 3
-draft: false
+draft: true
 role: Website development
 projectType: Client project
 coverImage: /case-studies/regions-in-focus.webp

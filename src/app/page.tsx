@@ -1,7 +1,6 @@
 import Link from "next/link";
 import BlogGrid from "./components/BlogGrid";
 import CaseStudyCard from "./components/CaseStudyCard";
-import Collaborators from "./components/Collaborators";
 import ContactCta from "./components/ContactCta";
 import HomeHero from "./components/HomeHero";
 import ServiceCard from "./components/ServiceCard";
@@ -74,13 +73,6 @@ export default async function Home() {
               <CaseStudyCard key={item.slug} caseStudy={item} compact />
             ))}
         </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-5 py-12 md:px-8">
-        <h2 className="mb-8 text-2xl font-medium md:text-3xl">
-          Clients & collaborators
-        </h2>
-        <Collaborators />
       </section>
 
       <section className="mx-auto grid max-w-6xl gap-8 px-5 py-12 md:grid-cols-2 md:gap-12 md:px-8">

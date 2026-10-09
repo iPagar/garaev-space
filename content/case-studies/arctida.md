@@ -4,7 +4,7 @@ summary: Website for an Arctic research organization.
 serviceSlug: websites-web-applications
 featured: true
 order: 4
-draft: false
+draft: true
 role: Website and CMS development
 projectType: Client project
 coverImage: /case-studies/arctida.webp
